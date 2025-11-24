@@ -60,7 +60,7 @@
         <!-- Menu Pemohon -->
         @if(auth()->user()->role == 'pemohon')
             <hr>
-            <small class="text-muted ms-3">LAYANAN</small>
+            <small class="text-light ms-3">LAYANAN</small>
             <a href="{{ route('pengajuan.create') }}" class="{{ request()->is('pengajuan/create') ? 'active' : '' }}">
                 <i class="fas fa-plus-circle me-2"></i> Buat Permohonan
             </a>
