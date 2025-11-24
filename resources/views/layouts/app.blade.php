@@ -68,14 +68,6 @@
                 <i class="fas fa-history me-2"></i> Riwayat Saya
             </a>
         @endif
-
-        <hr>
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-danger w-100 mt-3">
-                <i class="fas fa-sign-out-alt me-2"></i> Logout
-            </button>
-        </form>
     </div>
     @endauth
 
