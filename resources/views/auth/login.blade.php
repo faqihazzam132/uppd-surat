@@ -11,7 +11,8 @@
 <div class="card shadow p-4" style="width: 400px;">
     <div class="text-center mb-4">
         <h4>Sistem Surat Menyurat</h4>
-        <p class="text-muted">UPPD Kalideres</p>
+        <p class="text-muted mb-1">UPPD Kalideres</p>
+        <p class="small text-muted">Gunakan akun admin untuk masuk dashboard admin.</p>
     </div>
 
     @if ($errors->any())

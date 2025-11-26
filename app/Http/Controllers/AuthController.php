@@ -31,7 +31,9 @@ class AuthController extends Controller
             if ($role == 'pemohon') {
                 return redirect()->route('pengajuan.index');
             }
-            return redirect()->route('admin.dashboard');
+
+            // Untuk admin/staff/kepala_unit/kasubbag arahkan ke dashboard umum
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
@@ -90,11 +92,16 @@ class AuthController extends Controller
         $request->validate([
             'current_password' => 'required',
             'new_password' => 'required|min:6|confirmed', // 'confirmed' akan mengecek input 'new_password_confirmation' secara otomatis
+        ], [
+            'new_password.min' => 'Password baru setidaknya harus 6 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak sama dengan password baru.',
         ]);
 
         // Cek apakah password lama benar
         if (!Hash::check($request->current_password, Auth::user()->password)) {
-            return back()->withErrors(['current_password' => 'Password lama tidak sesuai!']);
+            return back()
+                ->withErrors(['current_password' => 'Password lama tidak sesuai!'])
+                ->with('error', 'Password lama yang Anda masukkan tidak sesuai.');
         }
 
         // Update password baru ke database

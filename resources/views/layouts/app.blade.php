@@ -13,6 +13,7 @@
         .sidebar { min-height: 100vh; background: #343a40; color: white; }
         .sidebar a { color: #adb5bd; text-decoration: none; display: block; padding: 10px 15px; }
         .sidebar a:hover, .sidebar a.active { background: #495057; color: white; }
+        .sidebar small.text-muted { color: #ffc107 !important; }
         .content { padding: 20px; }
     </style>
 </head>
@@ -27,17 +28,6 @@
         <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
             <i class="fas fa-tachometer-alt me-2"></i> Dashboard
         </a>
-
-        <!-- Tombol Logout -->
-        <hr>
-        <div class="px-3">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger w-100">
-                    <i class="fas fa-sign-out-alt me-2"></i> Keluar
-                </button>
-            </form>
-        </div>
 
         <!-- Menu Internal (Admin/Staff) -->
         @if(auth()->user()->role != 'pemohon')
@@ -55,6 +45,11 @@
             <a href="{{ route('admin.pengajuan.index') }}" class="{{ request()->is('admin/pengajuan*') ? 'active' : '' }}">
                 <i class="fas fa-file-alt me-2"></i> Verifikasi Pengajuan
             </a>
+            @if(auth()->user()->role == 'admin')
+                <a href="{{ route('admin.users.index') }}" class="{{ request()->is('admin/users*') ? 'active' : '' }}">
+                    <i class="fas fa-users me-2"></i> Manajemen Pengguna
+                </a>
+            @endif
         @endif
 
         <!-- Menu Pemohon -->
@@ -68,6 +63,12 @@
                 <i class="fas fa-history me-2"></i> Riwayat Saya
             </a>
         @endif
+
+        <hr>
+        <small class="text-muted ms-3">PENGATURAN</small>
+        <a href="{{ route('password.change') }}" class="{{ request()->is('change-password') ? 'active' : '' }}">
+            <i class="fas fa-key me-2"></i> Ubah Password
+        </a>
 
         <hr>
         <form action="{{ route('logout') }}" method="POST">
