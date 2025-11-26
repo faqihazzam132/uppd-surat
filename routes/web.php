@@ -30,6 +30,9 @@ Route::middleware('guest')->group(function () {
 // Auth (Sudah Login)
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->name('password.update');
+
 
     // Dashboard (Otomatis beda tampilan Admin vs Pemohon di Controller)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
