@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
+use App\Notifications\PengajuanDiterimaNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -40,7 +41,7 @@ class PengajuanController extends Controller
         // Generate No Registrasi Unik (Contoh: REG-20231025-X7Z)
         $no_registrasi = 'REG-' . date('Ymd') . '-' . strtoupper(Str::random(3));
 
-        Pengajuan::create([
+        $pengajuan = Pengajuan::create([
             'no_registrasi' => $no_registrasi,
             'user_id' => Auth::id(),
             'jenis_surat' => $request->jenis_surat,
@@ -49,7 +50,15 @@ class PengajuanController extends Controller
             'status' => 'menunggu_verifikasi',
         ]);
 
-        return redirect()->route('pengajuan.index')->with('success', 'Permohonan berhasil diajukan! Nomor Registrasi: ' . $no_registrasi);
+        // Kirim notifikasi ke pemohon
+        $user = Auth::user();
+        $user->notify(new PengajuanDiterimaNotification($pengajuan));
+
+        return redirect()->route('pengajuan.index')
+            ->with([
+                'success' => 'Permohonan berhasil diajukan!',
+                'no_registrasi' => $no_registrasi
+            ]);
     }
 
     // 4. Detail Pengajuan (Hanya milik user sendiri)

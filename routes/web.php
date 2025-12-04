@@ -7,6 +7,7 @@ use App\Http\Controllers\SuratMasukController;
 use App\Http\Controllers\SuratKeluarController;
 use App\Http\Controllers\DisposisiController;
 use App\Http\Controllers\PengajuanController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 /*
@@ -42,6 +43,13 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard (Otomatis beda tampilan Admin vs Pemohon di Controller)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Notifikasi (untuk semua user yang login)
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllRead');
+    });
 
     // --- KHUSUS INTERNAL (Admin, Staff, Kepala Unit) ---
     Route::middleware(['role:admin,staff,kepala_unit,kasubbag'])->group(function () {
