@@ -37,6 +37,11 @@
                     Lihat Berkas
                 </a>
             </div>
+            <div class="mt-4">
+                <a href="{{ route('pengajuan.bukti', $pengajuan->id) }}" class="btn btn-success" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Unduh Bukti Pengajuan (PDF)
+                </a>
+            </div>
         </div>
     </div>
 </div>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pengajuan extends Model
 {
@@ -23,5 +24,13 @@ class Pengajuan extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Riwayat log untuk pengajuan ini.
+     */
+    public function logs(): HasMany
+    {
+        return $this->hasMany(PengajuanLog::class);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -36,5 +37,13 @@ class User extends Authenticatable
     public function pengajuans()
     {
         return $this->hasMany(Pengajuan::class);
+    }
+
+    /**
+     * Riwayat log pengajuan yang dibuat / diubah oleh user ini.
+     */
+    public function pengajuanLogs(): HasMany
+    {
+        return $this->hasMany(PengajuanLog::class);
     }
 }
