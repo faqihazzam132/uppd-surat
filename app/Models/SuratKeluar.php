@@ -24,4 +24,9 @@ class SuratKeluar extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function arsip()
+    {
+        return $this->morphOne(Arsip::class, 'surat');
+    }
 }

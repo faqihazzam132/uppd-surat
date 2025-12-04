@@ -33,4 +33,9 @@ class SuratMasuk extends Model
     {
         return $this->hasMany(Disposisi::class);
     }
+
+    public function arsip()
+    {
+        return $this->morphOne(Arsip::class, 'surat');
+    }
 }

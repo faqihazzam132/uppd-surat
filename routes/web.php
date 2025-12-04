@@ -72,6 +72,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/pengajuan/export/pdf', [PengajuanController::class, 'exportPdf'])->name('admin.pengajuan.export.pdf');
         Route::patch('/admin/pengajuan/{id}', [PengajuanController::class, 'verify'])->name('admin.pengajuan.verify');
         Route::get('/admin/pengajuan/{id}/file', [PengajuanController::class, 'viewFileAdmin'])->name('admin.pengajuan.file');
+
+        // Arsip
+        Route::resource('arsip', \App\Http\Controllers\ArsipController::class);
+        Route::get('/arsip/create/{type}/{id}', [\App\Http\Controllers\ArsipController::class, 'create'])->name('arsip.create_from_surat');
     });
 
     // --- KHUSUS ADMIN: Manajemen Pengguna ---
