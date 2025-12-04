@@ -29,7 +29,7 @@ class SuratKeluarController extends Controller
             'tujuan' => 'required',
             'perihal' => 'required',
             'tanggal_surat' => 'required|date',
-            'file_draft' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'file_draft' => 'required|file|mimes:pdf|max:2048',
         ]);
 
         // Upload Draft
