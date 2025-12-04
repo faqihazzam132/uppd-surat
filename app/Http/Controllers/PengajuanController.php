@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
+use App\Models\PengajuanLog;
+use App\Models\SuratMasuk;
 use App\Notifications\PengajuanDiterimaNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +52,14 @@ class PengajuanController extends Controller
             'status' => 'menunggu_verifikasi',
         ]);
 
+        // Catat log pembuatan pengajuan
+        PengajuanLog::create([
+            'pengajuan_id' => $pengajuan->id,
+            'user_id' => Auth::id(),
+            'aksi' => 'dibuat',
+            'keterangan' => 'Pengajuan dibuat oleh pemohon dengan nomor registrasi ' . $no_registrasi,
+        ]);
+
         // Kirim notifikasi ke pemohon
         $user = Auth::user();
         $user->notify(new PengajuanDiterimaNotification($pengajuan));
@@ -71,6 +81,23 @@ class PengajuanController extends Controller
         return view('pengajuan.show', compact('pengajuan'));
     }
 
+    // 4b. Unduh bukti pengajuan (PDF) untuk pemohon
+    public function downloadReceipt($id)
+    {
+        $pengajuan = Pengajuan::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $pdf = Pdf::loadView('pengajuan.receipt_pdf', [
+            'pengajuan' => $pengajuan,
+            'user' => Auth::user(),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'bukti-pengajuan-' . $pengajuan->no_registrasi . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
     // 5. Lihat berkas syarat (hanya untuk pemilik pengajuan)
     public function viewFile($id)
     {
@@ -87,12 +114,26 @@ class PengajuanController extends Controller
         return response()->file($filePath);
     }
 
+    // 5b. Lihat berkas syarat (untuk Admin/Staff - tanpa batasan pemilik)
+    public function viewFileAdmin($id)
+    {
+        $pengajuan = Pengajuan::findOrFail($id);
+
+        $filePath = storage_path('app/public/'.$pengajuan->file_syarat);
+
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+
+        return response()->file($filePath);
+    }
+
     // --- UNTUK STAFF (Verifikator) ---
 
     // 4. Laporan / Daftar Pengajuan (Untuk Admin/Staff)
     public function indexAdmin(Request $request)
     {
-        $query = Pengajuan::with('user')->orderByDesc('created_at');
+        $query = Pengajuan::with(['user', 'logs.user'])->orderByDesc('created_at');
 
         // Filter tanggal
         if ($request->filled('tanggal_from')) {
@@ -160,17 +201,55 @@ class PengajuanController extends Controller
         $pengajuan = Pengajuan::findOrFail($id);
         
         $request->validate([
-            'status' => 'required|in:diterima,ditolak',
+            'status' => 'required|in:menunggu_verifikasi,diterima,ditolak',
             'catatan_petugas' => 'nullable|string',
         ]);
+
+        $statusLama = $pengajuan->status;
 
         $pengajuan->update([
             'status' => $request->status,
             'catatan_petugas' => $request->catatan_petugas,
         ]);
 
-        // Jika diterima, mungkin bisa otomatis masuk ke tabel SuratMasuk (Opsional)
-        // Logic tambahan bisa ditaruh di sini.
+        // Catat log perubahan status pengajuan
+        PengajuanLog::create([
+            'pengajuan_id' => $pengajuan->id,
+            'user_id' => Auth::id(),
+            'aksi' => 'status_diubah',
+            'keterangan' => 'Status diubah dari ' . $statusLama . ' menjadi ' . $request->status . '. Catatan petugas: ' . ($request->catatan_petugas ?? '-'),
+        ]);
+
+        // Jika pengajuan diterima, teruskan ke alur Surat Masuk & Disposisi
+        if ($request->status === 'diterima') {
+            // Cek apakah sudah pernah dibuat Surat Masuk untuk pengajuan ini (berdasarkan no_surat)
+            $suratMasuk = SuratMasuk::where('no_surat', $pengajuan->no_registrasi)->first();
+
+            if (!$suratMasuk) {
+                // Generate No Agenda otomatis seperti di SuratMasukController
+                $count = SuratMasuk::count() + 1;
+                $no_agenda = 'SM-' . date('Y') . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+                $suratMasuk = SuratMasuk::create([
+                    'no_agenda'        => $no_agenda,
+                    'no_surat'         => $pengajuan->no_registrasi,
+                    // Pakai tanggal dibuatnya pengajuan sebagai tanggal surat,
+                    // fallback ke hari ini kalau tidak tersedia
+                    'tanggal_surat'    => optional($pengajuan->created_at)->toDateString() ?? now()->toDateString(),
+                    'tanggal_diterima' => now(),
+                    'pengirim'         => optional($pengajuan->user)->name,
+                    'perihal'          => $pengajuan->jenis_surat,
+                    'sifat'            => $pengajuan->status === 'diterima' ? 'biasa' : null,
+                    'file_path'        => $pengajuan->file_syarat,
+                    'status'           => 'baru',
+                    'user_id'          => Auth::id(),
+                ]);
+            }
+
+            return redirect()
+                ->route('disposisi.create', $suratMasuk->id)
+                ->with('success', 'Pengajuan diterima dan dialihkan ke proses disposisi.');
+        }
 
         return redirect()->back()->with('success', 'Status pengajuan berhasil diperbarui.');
     }

@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/pengajuan', [PengajuanController::class, 'indexAdmin'])->name('admin.pengajuan.index');
         Route::get('/admin/pengajuan/export/pdf', [PengajuanController::class, 'exportPdf'])->name('admin.pengajuan.export.pdf');
         Route::patch('/admin/pengajuan/{id}', [PengajuanController::class, 'verify'])->name('admin.pengajuan.verify');
+        Route::get('/admin/pengajuan/{id}/file', [PengajuanController::class, 'viewFileAdmin'])->name('admin.pengajuan.file');
     });
 
     // --- KHUSUS ADMIN: Manajemen Pengguna ---
@@ -94,5 +95,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
         Route::get('/pengajuan/{id}', [PengajuanController::class, 'show'])->name('pengajuan.show');
         Route::get('/pengajuan/{id}/file', [PengajuanController::class, 'viewFile'])->name('pengajuan.file');
+        Route::get('/pengajuan/{id}/bukti', [PengajuanController::class, 'downloadReceipt'])->name('pengajuan.bukti');
     });
 });
