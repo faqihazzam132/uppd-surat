@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
+use App\Notifications\PengajuanDiterimaNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengajuanController extends Controller
 {
@@ -39,7 +41,7 @@ class PengajuanController extends Controller
         // Generate No Registrasi Unik (Contoh: REG-20231025-X7Z)
         $no_registrasi = 'REG-' . date('Ymd') . '-' . strtoupper(Str::random(3));
 
-        Pengajuan::create([
+        $pengajuan = Pengajuan::create([
             'no_registrasi' => $no_registrasi,
             'user_id' => Auth::id(),
             'jenis_surat' => $request->jenis_surat,
@@ -48,17 +50,108 @@ class PengajuanController extends Controller
             'status' => 'menunggu_verifikasi',
         ]);
 
-        return redirect()->route('pengajuan.index')->with('success', 'Permohonan berhasil diajukan! Nomor Registrasi: ' . $no_registrasi);
+        // Kirim notifikasi ke pemohon
+        $user = Auth::user();
+        $user->notify(new PengajuanDiterimaNotification($pengajuan));
+
+        return redirect()->route('pengajuan.index')
+            ->with([
+                'success' => 'Permohonan berhasil diajukan!',
+                'no_registrasi' => $no_registrasi
+            ]);
+    }
+
+    // 4. Detail Pengajuan (Hanya milik user sendiri)
+    public function show($id)
+    {
+        $pengajuan = Pengajuan::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return view('pengajuan.show', compact('pengajuan'));
+    }
+
+    // 5. Lihat berkas syarat (hanya untuk pemilik pengajuan)
+    public function viewFile($id)
+    {
+        $pengajuan = Pengajuan::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $filePath = storage_path('app/public/'.$pengajuan->file_syarat);
+
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+
+        return response()->file($filePath);
     }
 
     // --- UNTUK STAFF (Verifikator) ---
 
-    // 4. Halaman Daftar Masuk (Khusus Staff)
-    public function indexAdmin()
+    // 4. Laporan / Daftar Pengajuan (Untuk Admin/Staff)
+    public function indexAdmin(Request $request)
     {
-        // Menampilkan yang statusnya 'menunggu_verifikasi'
-        $pengajuans = Pengajuan::where('status', 'menunggu_verifikasi')->latest()->get();
-        return view('pengajuan.admin_index', compact('pengajuans'));
+        $query = Pengajuan::with('user')->orderByDesc('created_at');
+
+        // Filter tanggal
+        if ($request->filled('tanggal_from')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_from);
+        }
+        if ($request->filled('tanggal_to')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_to);
+        }
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter jenis surat
+        if ($request->filled('jenis_surat')) {
+            $query->where('jenis_surat', $request->jenis_surat);
+        }
+
+        $pengajuans = $query->get();
+
+        // Data untuk opsi filter (distinct)
+        $jenisSuratList = Pengajuan::select('jenis_surat')->distinct()->pluck('jenis_surat');
+
+        return view('pengajuan.admin_index', [
+            'pengajuans' => $pengajuans,
+            'jenisSuratList' => $jenisSuratList,
+            'filters' => $request->only(['tanggal_from', 'tanggal_to', 'status', 'jenis_surat']),
+        ]);
+    }
+
+    // Export laporan pengajuan ke PDF dengan filter yang sama
+    public function exportPdf(Request $request)
+    {
+        $query = Pengajuan::with('user')->orderByDesc('created_at');
+
+        if ($request->filled('tanggal_from')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_from);
+        }
+        if ($request->filled('tanggal_to')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_to);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('jenis_surat')) {
+            $query->where('jenis_surat', $request->jenis_surat);
+        }
+
+        $pengajuans = $query->get();
+
+        $pdf = Pdf::loadView('pengajuan.admin_report_pdf', [
+            'pengajuans' => $pengajuans,
+            'filters' => $request->only(['tanggal_from', 'tanggal_to', 'status', 'jenis_surat']),
+        ])->setPaper('a4', 'landscape');
+
+        $filename = 'laporan-pengajuan-' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     // 5. Proses Verifikasi (Terima/Tolak)

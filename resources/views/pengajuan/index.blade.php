@@ -39,8 +39,7 @@
                             @endif
                         </td>
                         <td>
-                            <!-- Tombol Aksi (Nanti bisa ditambah Detail) -->
-                            <button class="btn btn-sm btn-info text-white">Detail</button>
+                            <a href="{{ route('pengajuan.show', $p->id) }}" class="btn btn-sm btn-info text-white">Detail</a>
                         </td>
                     </tr>
                     @empty
