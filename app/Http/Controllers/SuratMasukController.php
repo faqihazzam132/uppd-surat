@@ -26,7 +26,7 @@ class SuratMasukController extends Controller
             'no_surat' => 'required',
             'pengirim' => 'required',
             'perihal' => 'required',
-            'file_surat' => 'required|file|mimes:pdf,jpg,png|max:2048',
+            'file_surat' => 'required|file|mimes:pdf|max:2048',
         ]);
 
         // Upload File

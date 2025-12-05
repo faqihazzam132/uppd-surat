@@ -52,19 +52,7 @@
                         <div class="col-md-9">: {{ $arsip->surat->perihal ?? '-' }}</div>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-3 fw-bold">File Arsip</div>
-                        <div class="col-md-9">
-                            : 
-                            @if($arsip->file_arsip)
-                                <a href="{{ asset('storage/' . $arsip->file_arsip) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-file-pdf me-1"></i> Lihat File Arsip
-                                </a>
-                            @else
-                                <span class="text-muted">Tidak ada file khusus arsip.</span>
-                            @endif
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>

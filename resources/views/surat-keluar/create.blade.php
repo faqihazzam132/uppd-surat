@@ -37,6 +37,20 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="kategori" class="form-label">Kategori Surat</label>
+                            <select class="form-select @error('kategori') is-invalid @enderror" id="kategori" name="kategori" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                <option value="Biasa" {{ old('kategori') == 'Biasa' ? 'selected' : '' }}>Biasa</option>
+                                <option value="Penting" {{ old('kategori') == 'Penting' ? 'selected' : '' }}>Penting</option>
+                                <option value="Rahasia" {{ old('kategori') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
+                                <option value="Segera" {{ old('kategori') == 'Segera' ? 'selected' : '' }}>Segera</option>
+                            </select>
+                            @error('kategori')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
                             <label for="file_draft" class="form-label">Upload Draft Surat (PDF)</label>
                             <input type="file" class="form-control @error('file_draft') is-invalid @enderror" id="file_draft" name="file_draft" accept=".pdf" required>
                             <div class="form-text">Hanya file PDF yang diperbolehkan. Maksimal ukuran file 2MB.</div>
