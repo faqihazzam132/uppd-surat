@@ -46,6 +46,9 @@
             <a href="{{ route('admin.pengajuan.index') }}" class="{{ request()->is('admin/pengajuan*') ? 'active' : '' }}">
                 <i class="fas fa-file-alt me-2"></i> Verifikasi Pengajuan
             </a>
+            <a href="{{ route('arsip.index') }}" class="{{ request()->is('arsip*') ? 'active' : '' }}">
+                <i class="fas fa-archive me-2"></i> Arsip Surat
+            </a>
             @if(auth()->user()->role == 'admin')
                 <a href="{{ route('admin.users.index') }}" class="{{ request()->is('admin/users*') ? 'active' : '' }}">
                     <i class="fas fa-users me-2"></i> Manajemen Pengguna
