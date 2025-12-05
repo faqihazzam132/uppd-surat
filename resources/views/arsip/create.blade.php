@@ -43,14 +43,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="file_arsip" class="form-label">File Scan Arsip (PDF, Opsional)</label>
-                            <input type="file" class="form-control @error('file_arsip') is-invalid @enderror" id="file_arsip" name="file_arsip" accept=".pdf">
-                            <div class="form-text">Jika kosong, akan menggunakan file dari surat terkait (jika ada).</div>
-                            @error('file_arsip')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+
 
                         <div class="d-flex justify-content-end">
                             <a href="{{ url()->previous() }}" class="btn btn-secondary me-2">Batal</a>
