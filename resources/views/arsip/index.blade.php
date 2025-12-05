@@ -6,6 +6,40 @@
         <h2>Daftar Arsip Surat</h2>
     </div>
 
+    {{-- Form Pencarian & Filter --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form action="{{ route('arsip.index') }}" method="GET">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Cari (No Surat / Perihal / Pengirim / Tujuan)</label>
+                        <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="Masukkan kata kunci...">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="jenis_surat" class="form-label">Jenis Surat</label>
+                        <select class="form-select" id="jenis_surat" name="jenis_surat">
+                            <option value="">Semua</option>
+                            <option value="masuk" {{ request('jenis_surat') == 'masuk' ? 'selected' : '' }}>Surat Masuk</option>
+                            <option value="keluar" {{ request('jenis_surat') == 'keluar' ? 'selected' : '' }}>Surat Keluar</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="tanggal_awal" class="form-label">Dari Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal" value="{{ request('tanggal_awal') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="tanggal_akhir" class="form-label">Sampai Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100 me-2">Filter</button>
+                        <a href="{{ route('arsip.index') }}" class="btn btn-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-body">
             <table class="table table-striped table-hover align-middle">

@@ -14,6 +14,7 @@ class SuratKeluar extends Model
         'tanggal_surat',
         'tujuan',
         'perihal',
+        'kategori',
         'file_draft',
         'file_final',
         'status',
@@ -28,5 +29,10 @@ class SuratKeluar extends Model
     public function arsip()
     {
         return $this->morphOne(Arsip::class, 'surat');
+    }
+
+    public function logs()
+    {
+        return $this->morphMany(SuratLog::class, 'surat')->latest();
     }
 }
