@@ -16,6 +16,10 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 |--------------------------------------------------------------------------
 */
 
+// --- PUBLIC TRACKING ---
+Route::get('/tracking', [\App\Http\Controllers\TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/tracking', [\App\Http\Controllers\TrackingController::class, 'search'])->name('tracking.search');
+
 // --- HALAMAN DEPAN & AUTHENTICATION ---
 Route::get('/', function () {
     return redirect()->route('login');
@@ -53,7 +57,7 @@ Route::middleware('auth')->group(function () {
 
     // --- KHUSUS INTERNAL (Admin, Staff, Kepala Unit) ---
     Route::middleware(['role:admin,staff,kepala_unit,kasubbag'])->group(function () {
-        
+
         // Surat Masuk
         Route::resource('surat-masuk', SuratMasukController::class);
 
@@ -66,6 +70,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/disposisi', [DisposisiController::class, 'index'])->name('disposisi.index');
         Route::get('/disposisi/create/{surat_id}', [DisposisiController::class, 'create'])->name('disposisi.create');
         Route::post('/disposisi', [DisposisiController::class, 'store'])->name('disposisi.store');
+        Route::get('/disposisi/{id}', [DisposisiController::class, 'show'])->name('disposisi.show');
+        Route::put('/disposisi/{id}', [DisposisiController::class, 'update'])->name('disposisi.update');
 
         // Verifikasi & Laporan Pengajuan Online
         Route::get('/admin/pengajuan', [PengajuanController::class, 'indexAdmin'])->name('admin.pengajuan.index');
@@ -76,6 +82,10 @@ Route::middleware('auth')->group(function () {
         // Arsip
         Route::resource('arsip', \App\Http\Controllers\ArsipController::class);
         Route::get('/arsip/create/{type}/{id}', [\App\Http\Controllers\ArsipController::class, 'create'])->name('arsip.create_from_surat');
+
+        // Laporan
+        Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
     });
 
     // --- KHUSUS ADMIN: Manajemen Pengguna ---
@@ -94,7 +104,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:pemohon'])->group(function () {
         // PASTIKAN NAMA ROUTE-NYA 'pengajuan.index'
         Route::get('/pengajuan', [PengajuanController::class, 'index'])->name('pengajuan.index');
-        
+
         Route::get('/pengajuan/create', [PengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
         Route::get('/pengajuan/{id}', [PengajuanController::class, 'show'])->name('pengajuan.show');
