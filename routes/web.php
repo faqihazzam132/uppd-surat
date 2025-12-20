@@ -64,6 +64,9 @@ Route::middleware('auth')->group(function () {
 
         // Surat Keluar
         Route::resource('surat-keluar', SuratKeluarController::class);
+        // Route khusus membuka draft (jika butuh melihat draft terpisah)
+        Route::get('/surat-keluar/{id}/file-draft', [SuratKeluarController::class, 'downloadDraft'])->name('surat-keluar.draft');
+        // Route umum untuk download (utamakan file final jika ada)
         Route::get('/surat-keluar/{id}/download', [SuratKeluarController::class, 'download'])->name('surat-keluar.download');
         Route::patch('/surat-keluar/{id}/status', [SuratKeluarController::class, 'updateStatus'])->name('surat-keluar.status');
         Route::post('/surat-keluar/{id}/upload-final', [SuratKeluarController::class, 'uploadFinal'])->name('surat-keluar.upload-final');

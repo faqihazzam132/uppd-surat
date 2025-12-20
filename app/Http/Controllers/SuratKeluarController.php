@@ -189,6 +189,34 @@ class SuratKeluarController extends Controller
         return view('surat-keluar.show', compact('surat'));
     }
 
+    // Download / Tampilkan File Draft (stream dari storage disk)
+    public function downloadDraft($id)
+    {
+        $surat = SuratKeluar::findOrFail($id);
+
+        if ($surat->file_draft) {
+            // 1) Try public disk (recommended)
+            if (Storage::disk('public')->exists($surat->file_draft)) {
+                return Storage::disk('public')->response($surat->file_draft);
+            }
+
+            // 2) Fallback: check common filesystem paths directly
+            $candidates = [
+                storage_path('app/public/' . $surat->file_draft),
+                storage_path('app/' . $surat->file_draft),
+                public_path('storage/' . $surat->file_draft),
+            ];
+
+            foreach ($candidates as $p) {
+                if ($p && file_exists($p)) {
+                    return response()->file($p);
+                }
+            }
+        }
+
+        abort(404, 'File draft tidak ditemukan.');
+    }
+
     // 6. Update Status (Verifikasi oleh Kasubbag/Kepala Unit)
     public function updateStatus(Request $request, $id)
     {
