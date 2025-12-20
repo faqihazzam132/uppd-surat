@@ -64,7 +64,7 @@ class SuratKeluarController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $surat = SuratKeluar::findOrFail($id);
-        
+
         $request->validate([
             'status' => 'required|in:verifikasi,disetujui,revisi,terkirim',
         ]);
@@ -91,5 +91,17 @@ class SuratKeluarController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'File final berhasil diunggah!');
+    }
+
+    public function download($id)
+    {
+        $surat = SuratKeluar::findOrFail($id);
+        $path = $surat->file_final ?? $surat->file_draft;
+
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            return back()->with('error', 'File tidak ditemukan.');
+        }
+
+        return Storage::disk('public')->download($path);
     }
 }

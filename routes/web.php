@@ -60,9 +60,11 @@ Route::middleware('auth')->group(function () {
 
         // Surat Masuk
         Route::resource('surat-masuk', SuratMasukController::class);
+        Route::get('/surat-masuk/{id}/download', [SuratMasukController::class, 'download'])->name('surat-masuk.download');
 
         // Surat Keluar
         Route::resource('surat-keluar', SuratKeluarController::class);
+        Route::get('/surat-keluar/{id}/download', [SuratKeluarController::class, 'download'])->name('surat-keluar.download');
         Route::patch('/surat-keluar/{id}/status', [SuratKeluarController::class, 'updateStatus'])->name('surat-keluar.status');
         Route::post('/surat-keluar/{id}/upload-final', [SuratKeluarController::class, 'uploadFinal'])->name('surat-keluar.upload-final');
 
@@ -73,12 +75,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/disposisi/{id}', [DisposisiController::class, 'show'])->name('disposisi.show');
         Route::put('/disposisi/{id}', [DisposisiController::class, 'update'])->name('disposisi.update');
 
-        // Verifikasi & Laporan Pengajuan Online
-        Route::get('/admin/pengajuan', [PengajuanController::class, 'indexAdmin'])->name('admin.pengajuan.index');
-        Route::get('/admin/pengajuan/export/pdf', [PengajuanController::class, 'exportPdf'])->name('admin.pengajuan.export.pdf');
-        Route::patch('/admin/pengajuan/{id}', [PengajuanController::class, 'verify'])->name('admin.pengajuan.verify');
-        Route::get('/admin/pengajuan/{id}/file', [PengajuanController::class, 'viewFileAdmin'])->name('admin.pengajuan.file');
-
         // Arsip
         Route::resource('arsip', \App\Http\Controllers\ArsipController::class);
         Route::get('/arsip/create/{type}/{id}', [\App\Http\Controllers\ArsipController::class, 'create'])->name('arsip.create_from_surat');
@@ -86,6 +82,15 @@ Route::middleware('auth')->group(function () {
         // Laporan
         Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
+    });
+
+    // --- KHUSUS VERIFIKASI (Admin, Staff, Kasubbag) ---
+    Route::middleware(['role:admin,staff,kasubbag'])->group(function () {
+        // Verifikasi & Laporan Pengajuan Online
+        Route::get('/admin/pengajuan', [PengajuanController::class, 'indexAdmin'])->name('admin.pengajuan.index');
+        Route::get('/admin/pengajuan/export/pdf', [PengajuanController::class, 'exportPdf'])->name('admin.pengajuan.export.pdf');
+        Route::patch('/admin/pengajuan/{id}', [PengajuanController::class, 'verify'])->name('admin.pengajuan.verify');
+        Route::get('/admin/pengajuan/{id}/file', [PengajuanController::class, 'viewFileAdmin'])->name('admin.pengajuan.file');
     });
 
     // --- KHUSUS ADMIN: Manajemen Pengguna ---

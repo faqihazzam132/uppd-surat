@@ -69,10 +69,12 @@
                     <a href="{{ route('surat-keluar.index') }}" class="{{ request()->is('surat-keluar*') ? 'active' : '' }}">
                         <i class="fas fa-paper-plane me-2"></i> Surat Keluar
                     </a>
-                    <a href="{{ route('admin.pengajuan.index') }}"
-                        class="{{ request()->is('admin/pengajuan*') ? 'active' : '' }}">
-                        <i class="fas fa-file-alt me-2"></i> Verifikasi Pengajuan
-                    </a>
+                    @if(auth()->user()->role != 'kepala_unit')
+                        <a href="{{ route('admin.pengajuan.index') }}"
+                            class="{{ request()->is('admin/pengajuan*') ? 'active' : '' }}">
+                            <i class="fas fa-file-alt me-2"></i> Verifikasi Pengajuan
+                        </a>
+                    @endif
                     <a href="{{ route('arsip.index') }}" class="{{ request()->is('arsip*') ? 'active' : '' }}">
                         <i class="fas fa-archive me-2"></i> Arsip Surat
                     </a>
