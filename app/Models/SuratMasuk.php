@@ -19,6 +19,7 @@ class SuratMasuk extends Model
         'sifat',
         'file_path',
         'status',
+        'posisi',
         'user_id',
     ];
 

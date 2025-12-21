@@ -60,15 +60,47 @@
                 @if(auth()->user()->role != 'pemohon')
                     <hr>
                     <small class="text-muted ms-3">ADMINISTRASI</small>
-                    <a href="{{ route('surat-masuk.index') }}" class="{{ request()->is('surat-masuk*') ? 'active' : '' }}">
-                        <i class="fas fa-inbox me-2"></i> Surat Masuk
+                    {{-- GROUP SURAT MASUK --}}
+                    <a href="#submenuSuratMasuk" data-bs-toggle="collapse" class="{{ request()->is('surat-masuk*') ? 'active' : '' }}">
+                        <i class="fas fa-inbox me-2"></i> Surat Masuk <i class="fas fa-chevron-down float-end mt-1" style="font-size: 0.8rem;"></i>
                     </a>
+                    <div class="collapse {{ request()->is('surat-masuk*') ? 'show' : '' }}" id="submenuSuratMasuk" style="background: #2c3034;">
+                        @if(in_array(auth()->user()->role, ['admin', 'staff']))
+                            <a href="{{ route('surat-masuk.create') }}" class="ps-4 {{ request()->routeIs('surat-masuk.create') ? 'text-white fw-bold' : '' }}">
+                                <i class="fas fa-plus me-2"></i> Buat Surat Masuk
+                            </a>
+                        @endif
+                        
+                        <a href="{{ route('surat-masuk.validasi') }}" class="ps-4 {{ request()->routeIs('surat-masuk.validasi') ? 'text-white fw-bold' : '' }}">
+                            <i class="fas fa-check-circle me-2"></i> Validasi Surat Masuk
+                        </a>
+                        
+                        <a href="{{ route('surat-masuk.index') }}" class="ps-4 {{ request()->routeIs('surat-masuk.index') ? 'text-white fw-bold' : '' }}">
+                            <i class="fas fa-list me-2"></i> Data Surat Masuk
+                        </a>
+                    </div>
                     <a href="{{ route('disposisi.index') }}" class="{{ request()->is('disposisi*') ? 'active' : '' }}">
                         <i class="fas fa-share-square me-2"></i> Disposisi
                     </a>
-                    <a href="{{ route('surat-keluar.index') }}" class="{{ request()->is('surat-keluar*') ? 'active' : '' }}">
-                        <i class="fas fa-paper-plane me-2"></i> Surat Keluar
-                    </a>
+                    {{-- GROUP SURAT KELUAR (STAFF ONLY) --}}
+                    @if(auth()->user()->role == 'staff')
+                        <a href="#submenuSuratKeluar" data-bs-toggle="collapse" class="{{ request()->is('surat-keluar*') ? 'active' : '' }}">
+                            <i class="fas fa-paper-plane me-2"></i> Surat Keluar <i class="fas fa-chevron-down float-end mt-1" style="font-size: 0.8rem;"></i>
+                        </a>
+                        <div class="collapse {{ request()->is('surat-keluar*') ? 'show' : '' }}" id="submenuSuratKeluar" style="background: #2c3034;">
+                            <a href="{{ route('surat-keluar.create') }}" class="ps-4 {{ request()->routeIs('surat-keluar.create') ? 'text-white fw-bold' : '' }}">
+                                <i class="fas fa-plus me-2"></i> Buat Surat Keluar
+                            </a>
+                            <a href="{{ route('surat-keluar.index') }}" class="ps-4 {{ request()->routeIs('surat-keluar.index') ? 'text-white fw-bold' : '' }}">
+                                <i class="fas fa-list me-2"></i> Data Surat Keluar
+                            </a>
+                        </div>
+                    @else
+                        {{-- SURAT KELUAR (NON-STAFF) --}}
+                        <a href="{{ route('surat-keluar.index') }}" class="{{ request()->is('surat-keluar*') ? 'active' : '' }}">
+                            <i class="fas fa-paper-plane me-2"></i> Surat Keluar
+                        </a>
+                    @endif
                     @if(auth()->user()->role != 'kepala_unit')
                         <a href="{{ route('admin.pengajuan.index') }}"
                             class="{{ request()->is('admin/pengajuan*') ? 'active' : '' }}">
