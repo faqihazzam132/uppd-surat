@@ -31,13 +31,16 @@
                                 <td>{{ $surat->pengirim }}</td>
                                 <td>{{ $surat->perihal }}</td>
                                 <td>
-                                    <a href="{{ route('surat-masuk.show', $surat) }}" class="btn btn-sm btn-info text-white">
-                                        Detail
-                                    </a>
-                                    <a href="{{ route('surat-masuk.download', $surat->id) }}"
-                                        class="btn btn-sm btn-success text-white" title="Download">
-                                        <i class="fas fa-download"></i>
-                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('surat-masuk.show', $surat) }}"
+                                            class="btn btn-sm btn-info text-white">
+                                            Detail
+                                        </a>
+                                        <a href="{{ route('surat-masuk.download', $surat->id) }}"
+                                            class="btn btn-sm btn-success text-white" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
