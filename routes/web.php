@@ -58,8 +58,11 @@ Route::middleware('auth')->group(function () {
     // --- KHUSUS INTERNAL (Admin, Staff, Kepala Unit) ---
     Route::middleware(['role:admin,staff,kepala_unit,kasubbag'])->group(function () {
 
-        // Surat Masuk
+        Route::get('/surat-masuk/validasi', [SuratMasukController::class, 'validasi'])->name('surat-masuk.validasi');
+        Route::get('/surat-masuk/{id}/view-file', [SuratMasukController::class, 'viewFile'])->name('surat-masuk.view-file');
         Route::resource('surat-masuk', SuratMasukController::class);
+        Route::post('/surat-masuk/{id}/forward', [SuratMasukController::class, 'forward'])->name('surat-masuk.forward');
+        Route::patch('/surat-masuk/{id}/selesai', [SuratMasukController::class, 'selesai'])->name('surat-masuk.selesai');
         Route::get('/surat-masuk/{id}/download', [SuratMasukController::class, 'download'])->name('surat-masuk.download');
 
         // Surat Keluar

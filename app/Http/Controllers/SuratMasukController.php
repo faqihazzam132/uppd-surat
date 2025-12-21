@@ -9,10 +9,29 @@ use Illuminate\Support\Facades\Auth;
 
 class SuratMasukController extends Controller
 {
+    // 1. Data Surat Masuk (Hanya yang Selesai)
     public function index()
     {
-        $surats = SuratMasuk::latest()->get();
-        return view('surat-masuk.index', compact('surats'));
+        // "hanya surat yang statusnya udah selesai"
+        $surats = SuratMasuk::where('status', 'selesai')->latest()->get();
+        return view('surat-masuk.data', compact('surats'));
+    }
+
+    // 2. Validasi Surat Masuk (Surat Aktif / Belum Selesai)
+    public function validasi()
+    {
+        $user = Auth::user();
+        
+        // Filter Strict: Hanya tampilkan surat yang posisinya sedang di user tersebut
+        if ($user->role == 'admin') {
+            $surats = SuratMasuk::where('status', '!=', 'selesai')->latest()->get();
+        } else {
+            $surats = SuratMasuk::where('posisi', $user->role)
+                                ->where('status', '!=', 'selesai')
+                                ->latest()->get();
+        }
+        
+        return view('surat-masuk.validasi', compact('surats'));
     }
 
     public function create()
@@ -46,14 +65,72 @@ class SuratMasukController extends Controller
             'sifat' => $request->sifat,
             'file_path' => $path,
             'user_id' => Auth::id(),
+            'posisi' => 'staff', // Default position
+            'status' => 'menunggu_validasi', // Initial status
         ]);
 
-        return redirect()->route('surat-masuk.index')->with('success', 'Surat Masuk berhasil dicatat!');
+        return redirect()->route('surat-masuk.validasi')->with('success', 'Surat Masuk berhasil dicatat!');
     }
 
     public function show(SuratMasuk $suratMasuk)
     {
         return view('surat-masuk.show', compact('suratMasuk'));
+    }
+
+    // Fitur 2: Validasi / Teruskan (Staff)
+    public function forward(Request $request, $id)
+    {
+        $request->validate([
+            'tujuan_role' => 'required|in:kepala_unit,kasubbag',
+        ]);
+
+        $surat = SuratMasuk::findOrFail($id);
+        
+        // Update posisi surat ke role yang dipilih
+        $surat->update([
+            'posisi' => $request->tujuan_role,
+            'status' => 'menunggu_disposisi' // Status update indicates ready for leader
+        ]);
+
+        return redirect()->back()->with('success', 'Surat berhasil diteruskan ke ' . ucwords(str_replace('_', ' ', $request->tujuan_role)));
+    }
+
+    // Fitur 2: Selesai (Leader)
+    public function selesai($id)
+    {
+        $surat = SuratMasuk::findOrFail($id);
+        
+        // Pastikan hanya leader yang memegang surat ini yang bisa menyelesaikan
+        if (Auth::user()->role != $surat->posisi && Auth::user()->role != 'admin') {
+             abort(403, 'Anda tidak memiliki akses untuk menyelesaikan surat ini.');
+        }
+
+        $surat->update([
+            'status' => 'selesai',
+            // Posisi could remain or be cleared. Let's keep it for history or clear it to remove from active list if strict.
+            // Requirement says "staff bisa melihat semua daftar". Leaders see "what is chosen for them".
+            // If finished, maybe it shouldn't be in Leader's "Actionable" list anymore?
+            // Let's keep 'posisi' but filter by status in Index if needed? 
+            // The existing filter is just `where('posisi', $role)`. 
+            // Let's assume Finished items stay visible to them until Archived?
+            // Or maybe 'posisi' should change to 'arsip' or null?
+            // For now, let's keep it simpler: Mark as finished.
+        ]);
+
+        return redirect()->back()->with('success', 'Surat ditandai sebagai Selesai.');
+    }
+
+    public function viewFile($id)
+    {
+        $surat = SuratMasuk::findOrFail($id);
+        
+        // Ensure file exists
+        if (!$surat->file_path || !Storage::disk('public')->exists($surat->file_path)) {
+             abort(404, 'File tidak ditemukan');
+        }
+        
+        // Return file inline (for browser viewing)
+        return response()->file(storage_path('app/public/' . $surat->file_path));
     }
 
     public function download($id)

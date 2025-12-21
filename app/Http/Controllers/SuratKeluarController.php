@@ -17,7 +17,25 @@ class SuratKeluarController extends Controller
     // 1. Tampilkan Daftar Surat Keluar
     public function index()
     {
-        $surats = SuratKeluar::latest()->get();
+        $user = Auth::user();
+
+        if ($user->role == 'staff' || $user->role == 'admin') {
+            // Staff & Admin melihat semua (Data Surat Keluar)
+            $surats = SuratKeluar::latest()->get();
+        } elseif ($user->role == 'kasubbag') {
+            // Kasubbag melihat yang butuh verifikasi awal (Draft) atau Revisi
+            // Asumsi: Staff create 'draft' -> Kasubbag Check
+            $surats = SuratKeluar::whereIn('status', ['draft', 'revisi'])->latest()->get();
+        } elseif ($user->role == 'kepala_unit') {
+            // Kepala Unit melihat yang sudah diverifikasi Kasubbag/Butuh Persetujuan
+            // Asumsi: Kasubbag updates 'draft' -> 'verifikasi' -> KU Check
+            // User juga bilang KU bisa input dokumen final, mungkin status 'disetujui' juga?
+            // "berisi surat keluar yang harus ditindak lanjuti" -> Verifikasi & Upload Final?
+            $surats = SuratKeluar::whereIn('status', ['verifikasi', 'disetujui'])->latest()->get();
+        } else {
+            $surats = collect();
+        }
+
         return view('surat-keluar.index', compact('surats'));
     }
 
@@ -216,7 +234,7 @@ class SuratKeluarController extends Controller
 
         abort(404, 'File draft tidak ditemukan.');
     }
-
+    
     // 6. Update Status (Verifikasi oleh Kasubbag/Kepala Unit)
     public function updateStatus(Request $request, $id)
     {

@@ -59,28 +59,94 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Info Arsip --}}
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">Pengarsipan</h5>
+            
+            {{-- Form Teruskan (Khusus Staff & Posisi Staff) --}}
+            @if(auth()->user()->role == 'staff' && $suratMasuk->posisi == 'staff')
+            <div class="card shadow-sm mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-share me-2"></i>Teruskan Surat</h5>
                 </div>
                 <div class="card-body">
-                    @if($suratMasuk->arsip)
-                        <div class="alert alert-success mb-0">
-                            <i class="fas fa-check-circle me-2"></i> Surat ini sudah diarsipkan.
-                            <a href="{{ route('arsip.show', $suratMasuk->arsip->id) }}" class="fw-bold text-decoration-none ms-2">Lihat Arsip</a>
+                    <form action="{{ route('surat-masuk.forward', $suratMasuk->id) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="tujuan_role" class="form-label fw-bold">Teruskan Kepada:</label>
+                            <select name="tujuan_role" class="form-select" required>
+                                <option value="" disabled selected>Pilih Pimpinan...</option>
+                                <option value="kepala_unit">Kepala Unit</option>
+                                <option value="kasubbag">Kepala Bagian (Kasubbag)</option>
+                            </select>
                         </div>
-                    @else
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-circle me-2"></i> Surat ini belum diarsipkan.
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> Kirim / Teruskan
+                            </button>
                         </div>
-                        <a href="{{ route('arsip.create_from_surat', ['type' => 'surat-masuk', 'id' => $suratMasuk->id]) }}" class="btn btn-dark">
-                            <i class="fas fa-archive me-1"></i> Arsipkan Surat Ini
-                        </a>
-                    @endif
+                    </form>
                 </div>
             </div>
+            @endif
+
+            {{-- Riwayat Surat (Hanya muncul jika status Selesai) --}}
+            @if($suratMasuk->status == 'selesai')
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i> Riwayat Digital Surat</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>Dari</th>
+                                    <th>Kepada</th>
+                                    <th>Keterangan</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- 1. Log Pembuatan Surat --}}
+                                <tr>
+                                    <td>{{ $suratMasuk->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ $suratMasuk->user->name ?? 'Staff' }}</td>
+                                    <td>-</td>
+                                    <td>Surat Masuk Dibuat</td>
+                                    <td><span class="badge bg-secondary">Baru</span></td>
+                                </tr>
+
+                                {{-- 2. Log Disposisi --}}
+                                @foreach($suratMasuk->disposisis as $log)
+                                    <tr>
+                                        <td>{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $log->pengirim->name ?? '-' }}</td>
+                                        <td>{{ $log->penerima->name ?? '-' }}</td>
+                                        <td>{{ $log->instruksi }}</td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">Didisposisikan</span>
+                                            @if($log->catatan_tambahan)
+                                                <div class="small text-muted mt-1">{{ $log->catatan_tambahan }}</div>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+
+                                {{-- 3. Log Selesai --}}
+                                <tr class="table-success">
+                                    <td>{{ $suratMasuk->updated_at->format('d/m/Y H:i') }}</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>Proses Selesai</td>
+                                    <td><span class="badge bg-success">Selesai</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+
         </div>
     </div>
 </div>
