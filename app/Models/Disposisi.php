@@ -18,6 +18,7 @@ class Disposisi extends Model
         'batas_waktu',
         'status',
         'laporan_penyelesaian',
+        'file_penyelesaian',
     ];
 
     public function suratMasuk()
