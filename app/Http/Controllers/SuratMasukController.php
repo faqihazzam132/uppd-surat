@@ -55,4 +55,13 @@ class SuratMasukController extends Controller
     {
         return view('surat-masuk.show', compact('suratMasuk'));
     }
+
+    public function download($id)
+    {
+        $surat = SuratMasuk::findOrFail($id);
+        if (!$surat->file_path || !Storage::disk('public')->exists($surat->file_path)) {
+            return back()->with('error', 'File tidak ditemukan.');
+        }
+        return Storage::disk('public')->download($surat->file_path);
+    }
 }

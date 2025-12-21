@@ -67,12 +67,12 @@
                         <div class="col-md-3 fw-bold">File Draft</div>
                         <div class="col-md-9">
                             : 
-                            @if($surat->file_draft)
-                                <a href="{{ asset('storage/' . $surat->file_draft) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            @if($surat->file_draft && \Illuminate\Support\Facades\Storage::disk('public')->exists($surat->file_draft))
+                                <a href="{{ route('surat-keluar.draft', $surat->id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-file-alt me-1"></i> Lihat Draft
                                 </a>
                             @else
-                                <span class="text-muted">-</span>
+                                <span class="text-muted">File draft tidak ditemukan</span>
                             @endif
                         </div>
                     </div>

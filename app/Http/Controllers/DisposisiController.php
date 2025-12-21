@@ -22,6 +22,12 @@ class DisposisiController extends Controller
         $disposisiMasuk = collect();
         $disposisiTerkirim = collect();
 
+        // Fetch Disposisi Masuk for everyone (including Kepala Unit)
+        $disposisiMasuk = Disposisi::where('penerima_id', $user->id)
+            ->with(['suratMasuk', 'pengirim'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         if ($user->role === 'kepala_unit') {
             // FR-D-01: Kepala Unit melihat surat masuk "Menunggu Disposisi"
             $suratBelumDisposisi = SuratMasuk::where('status', 'menunggu_disposisi')->get();
@@ -32,20 +38,12 @@ class DisposisiController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-        } else {
-            // FR-D-03 & FR-D-06: Kasubbag/Staff melihat disposisi masuk
-            $disposisiMasuk = Disposisi::where('penerima_id', $user->id)
-                ->with(['suratMasuk', 'pengirim'])
+        } elseif ($user->role === 'kasubbag') {
+            // Kasubbag juga bisa melihat yang dia teruskan
+            $disposisiTerkirim = Disposisi::where('pengirim_id', $user->id)
+                ->with(['suratMasuk', 'penerima'])
                 ->orderBy('created_at', 'desc')
                 ->get();
-
-            // Kasubbag juga bisa melihat yang dia teruskan
-            if ($user->role === 'kasubbag') {
-                $disposisiTerkirim = Disposisi::where('pengirim_id', $user->id)
-                    ->with(['suratMasuk', 'penerima'])
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-            }
         }
 
         return view('disposisi.index', compact('suratBelumDisposisi', 'disposisiMasuk', 'disposisiTerkirim'));
