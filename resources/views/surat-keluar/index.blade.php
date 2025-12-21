@@ -10,11 +10,7 @@
                     Validasi Surat Keluar
                 @endif
             </h2>
-            @if(Auth::user()->role == 'staff')
-                <a href="{{ route('surat-keluar.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i> Buat Surat Keluar
-                </a>
-            @endif
+
         </div>
 
         <div class="card shadow-sm">
@@ -73,8 +69,8 @@
                                                 </a>
                                             @endif
 
-                                            {{-- Arsip (Khusus Staff & Status Terkirim) --}}
-                                            @if(Auth::user()->role == 'staff' && $surat->status == 'terkirim')
+                                            {{-- Arsip (Khusus Staff - Semua Status) --}}
+                                            @if(Auth::user()->role == 'staff')
                                                 <a href="{{ route('arsip.create_from_surat', ['type' => 'surat-keluar', 'id' => $surat->id]) }}" 
                                                    class="btn btn-sm btn-dark" title="Arsipkan">
                                                     <i class="fas fa-archive"></i>
