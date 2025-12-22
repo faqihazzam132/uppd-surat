@@ -3,14 +3,7 @@
 @section('content')
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>
-                @if(Auth::user()->role == 'staff')
-                    Data Surat Keluar
-                @else
-                    Validasi Surat Keluar
-                @endif
-            </h2>
-
+            <h2>Data Surat Keluar (Selesai/Terkirim)</h2>
         </div>
 
         <div class="card shadow-sm">
@@ -35,41 +28,21 @@
                                     <td>{{ $surat->tujuan }}</td>
                                     <td>{{ $surat->perihal }}</td>
                                     <td>
-                                        @if($surat->status == 'draft')
-                                            <span class="badge bg-secondary">Draft</span>
-                                        @elseif($surat->status == 'verifikasi')
-                                            <span class="badge bg-warning text-dark">Verifikasi</span>
-                                        @elseif($surat->status == 'disetujui')
-                                            <span class="badge bg-info text-dark">Disetujui</span>
-                                        @elseif($surat->status == 'revisi')
-                                            <span class="badge bg-danger">Revisi</span>
-                                        @elseif($surat->status == 'terkirim')
-                                            <span class="badge bg-success">Terkirim</span>
-                                        @else
-                                            <span class="badge bg-light text-dark">{{ $surat->status }}</span>
-                                        @endif
+                                        <span class="badge bg-success">Terkirim / Selesai</span>
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            {{-- Lihat Dokumen (Semua Role) --}} 
-                                            {{-- Prioritas File Final, jika tidak ada File Draft --}}
-                                            <a href="{{ route('surat-keluar.draft', $surat->id) }}" target="_blank" class="btn btn-sm btn-info text-white" title="Lihat Dokumen">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-
                                             {{-- Detail (Semua Role) --}}
                                             <a href="{{ route('surat-keluar.show', $surat) }}" class="btn btn-sm btn-secondary text-white" title="Detail">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
 
-                                            {{-- Download (Khusus Kepala Unit sesuai request) --}}
-                                            @if(Auth::user()->role == 'kepala_unit')
-                                                <a href="{{ route('surat-keluar.download', $surat->id) }}" class="btn btn-sm btn-success text-white" title="Download">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
-                                            @endif
+                                            {{-- Download (Semua Role) --}}
+                                            <a href="{{ route('surat-keluar.download', $surat->id) }}" class="btn btn-sm btn-success text-white" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </a>
 
-                                            {{-- Arsip (Khusus Staff - Semua Status) --}}
+                                            {{-- Arsip (Khusus Staff) --}}
                                             @if(Auth::user()->role == 'staff')
                                                 <a href="{{ route('arsip.create_from_surat', ['type' => 'surat-keluar', 'id' => $surat->id]) }}" 
                                                    class="btn btn-sm btn-dark" title="Arsipkan">
@@ -82,11 +55,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center py-4">
-                                        @if(Auth::user()->role == 'staff')
-                                            Belum ada data surat keluar.
-                                        @else
-                                            Tidak ada surat yang perlu ditindaklanjuti.
-                                        @endif
+                                        Data surat keluar yang selesai belum tersedia.
                                     </td>
                                 </tr>
                             @endforelse

@@ -71,11 +71,13 @@
                                 <a href="{{ route('arsip.show', $arsip->id) }}" class="btn btn-sm btn-info text-white">
                                     Detail
                                 </a>
-                                <form action="{{ route('arsip.destroy', $arsip->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus arsip ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                </form>
+                                @if(in_array(Auth::user()->role, ['admin', 'staff']))
+                                    <form action="{{ route('arsip.destroy', $arsip->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus arsip ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

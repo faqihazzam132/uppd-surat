@@ -25,7 +25,21 @@ class DashboardController extends Controller
             $totalDisposisi = Disposisi::where('status', 'belum_dibaca')->count();
             $pengajuanBaru = Pengajuan::where('status', 'menunggu_verifikasi')->count();
 
-            return view('dashboard.admin', compact('totalMasuk', 'totalKeluar', 'totalDisposisi', 'pengajuanBaru'));
+            // Statistik Bulanan (Tahun Ini)
+            $masukPerBulan = [];
+            $keluarPerBulan = [];
+            
+            for ($m = 1; $m <= 12; $m++) {
+                $masukPerBulan[] = SuratMasuk::whereYear('tanggal_diterima', date('Y'))
+                                            ->whereMonth('tanggal_diterima', $m)
+                                            ->count();
+                                            
+                $keluarPerBulan[] = SuratKeluar::whereYear('tanggal_surat', date('Y'))
+                                            ->whereMonth('tanggal_surat', $m)
+                                            ->count();
+            }
+
+            return view('dashboard.admin', compact('totalMasuk', 'totalKeluar', 'totalDisposisi', 'pengajuanBaru', 'masukPerBulan', 'keluarPerBulan'));
         }
     }
 }

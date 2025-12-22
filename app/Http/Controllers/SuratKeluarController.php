@@ -14,29 +14,61 @@ use App\Models\SuratLog;
 
 class SuratKeluarController extends Controller
 {
-    // 1. Tampilkan Daftar Surat Keluar
+    // 1. Data Surat Keluar (Arsip / Selesai)
     public function index()
     {
-        $user = Auth::user();
+        // Menu "Data Surat Keluar" -> Hanya yang statusnya selesai/terkirim
+        // Status 'terkirim' anggap sebagai selesai final
+        $surats = SuratKeluar::whereIn('status', ['terkirim', 'selesai'])->latest()->get();
+        return view('surat-keluar.index', compact('surats'));
+    }
 
-        if ($user->role == 'staff' || $user->role == 'admin') {
-            // Staff & Admin melihat semua (Data Surat Keluar)
-            $surats = SuratKeluar::latest()->get();
-        } elseif ($user->role == 'kasubbag') {
-            // Kasubbag melihat yang butuh verifikasi awal (Draft) atau Revisi
-            // Asumsi: Staff create 'draft' -> Kasubbag Check
-            $surats = SuratKeluar::whereIn('status', ['draft', 'revisi'])->latest()->get();
-        } elseif ($user->role == 'kepala_unit') {
-            // Kepala Unit melihat yang sudah diverifikasi Kasubbag/Butuh Persetujuan
-            // Asumsi: Kasubbag updates 'draft' -> 'verifikasi' -> KU Check
-            // User juga bilang KU bisa input dokumen final, mungkin status 'disetujui' juga?
-            // "berisi surat keluar yang harus ditindak lanjuti" -> Verifikasi & Upload Final?
-            $surats = SuratKeluar::whereIn('status', ['verifikasi', 'disetujui'])->latest()->get();
-        } else {
-            $surats = collect();
+    // 1b. Surat Keluar Aktif (Staff: Draft, Revisi, Proses)
+    public function aktif()
+    {
+        $user = Auth::user();
+        if ($user->role != 'staff' && $user->role != 'admin') {
+            abort(403);
         }
 
-        return view('surat-keluar.index', compact('surats'));
+        // Staff melihat surat yang masih berproses (belum final)
+        // Termasuk yang sedang diverifikasi atasan agar bisa dipantau
+        $surats = SuratKeluar::whereIn('status', ['draft', 'revisi', 'verifikasi', 'disetujui'])
+                    ->latest()
+                    ->get();
+        
+        return view('surat-keluar.aktif', compact('surats'));
+    }
+
+    // 1c. Review Surat Keluar (Kasubbag / Kepala Unit)
+    public function review()
+    {
+        $user = Auth::user();
+        $surats = collect();
+
+        if ($user->role == 'kasubbag' || $user->role == 'admin') {
+            // Kasubbag Review: Draft (Baru dari Staff) atau Revisi (Jika ada trouble)
+            // Revisi biasanya balik ke Staff, tapi Verifikator perlu lihat?
+            // Prompt: "Review... berisi daftar yang harus direview" -> Actionable items
+            // Actionable for Kasubbag: 'draft' sent by Staff.
+            $surats = SuratKeluar::whereIn('status', ['draft'])->latest()->get();
+            
+            // Note: Jika 'revisi', itu artinya dikembalikan ke Staff, jadi bukan tugas Kasubbag saat ini.
+            // Kecuali jika dikembalikan oleh Ka. Unit ke Kasubbag? (status 'revisi' + tujuan 'kasubbag')
+            // Kita coba tambahkan logic itu jika field 'tujuan_revisi' ada (tapi database belum tentu record siapa tujuannya di kolom terpisah selain logs).
+            // Simplifikasi: Kasubbag tugasnya memverifikasi Draft baru.
+        } 
+        
+        if ($user->role == 'kepala_unit' || $user->role == 'admin') {
+            // Kepala Unit Review: 'verifikasi' (Dari Kasubbag) dan 'disetujui' (Butuh Upload Final)
+            $surats = $surats->merge(SuratKeluar::whereIn('status', ['verifikasi', 'disetujui'])->latest()->get());
+        }
+
+        if ($user->role == 'staff') {
+            abort(403); 
+        }
+
+        return view('surat-keluar.review', compact('surats'));
     }
 
     // 2. Form Buat Surat Keluar Baru
@@ -91,7 +123,7 @@ class SuratKeluarController extends Controller
             $no_surat
         ));
 
-        return redirect()->route('surat-keluar.index')->with('success', 'Draft Surat Keluar berhasil dibuat!');
+        return redirect()->route('surat-keluar.aktif')->with('success', 'Draft Surat Keluar berhasil dibuat!');
     }
 
     // 4. Edit Surat Keluar (Jika status draft/revisi)
@@ -268,11 +300,13 @@ class SuratKeluarController extends Controller
 
             if ($targetRole == 'staff') {
                 // Notifikasi ke Staff (Pembuat)
-                $surat->user->notify(new StatusSuratNotification(
-                    "Surat dikembalikan untuk REVISI. Catatan: " . $catatan,
-                    route('surat-keluar.show', $surat->id),
-                    $surat->no_surat
-                ));
+                if ($surat->user) {
+                    $surat->user->notify(new StatusSuratNotification(
+                        "Surat dikembalikan untuk REVISI. Catatan: " . $catatan,
+                        route('surat-keluar.show', $surat->id),
+                        $surat->no_surat
+                    ));
+                }
             } elseif ($targetRole == 'kasubbag') {
                 // Notifikasi ke Kasubbag
                 $kasubbags = User::where('role', 'kasubbag')->get();
@@ -285,11 +319,13 @@ class SuratKeluarController extends Controller
         } else {
             // Notifikasi standar untuk status lain (Verifikasi, Disetujui)
             
-            $surat->user->notify(new StatusSuratNotification(
-                "Status surat keluar ($surat->no_surat) diperbarui menjadi: " . ucfirst($request->status),
-                route('surat-keluar.show', $surat->id),
-                $surat->no_surat
-            ));
+            if ($surat->user) {
+                $surat->user->notify(new StatusSuratNotification(
+                    "Status surat keluar ($surat->no_surat) diperbarui menjadi: " . ucfirst($request->status),
+                    route('surat-keluar.show', $surat->id),
+                    $surat->no_surat
+                ));
+            }
         }
 
         return redirect()->back()->with('success', 'Status surat berhasil diperbarui.');

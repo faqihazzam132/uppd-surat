@@ -106,6 +106,11 @@ class ArsipController extends Controller
     // 5. Hapus Arsip
     public function destroy($id)
     {
+        // Hapus Arsip
+        if (!in_array(auth()->user()->role, ['admin', 'staff'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $arsip = Arsip::findOrFail($id);
         $arsip->delete();
 

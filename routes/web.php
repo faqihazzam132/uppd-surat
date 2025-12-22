@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/surat-masuk/{id}/download', [SuratMasukController::class, 'download'])->name('surat-masuk.download');
 
         // Surat Keluar
+        Route::get('/surat-keluar/aktif', [SuratKeluarController::class, 'aktif'])->name('surat-keluar.aktif');
+        Route::get('/surat-keluar/review', [SuratKeluarController::class, 'review'])->name('surat-keluar.review');
         Route::resource('surat-keluar', SuratKeluarController::class);
         // Route khusus membuka draft (jika butuh melihat draft terpisah)
         Route::get('/surat-keluar/{id}/file-draft', [SuratKeluarController::class, 'downloadDraft'])->name('surat-keluar.draft');
@@ -90,13 +92,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
     });
 
-    // --- KHUSUS VERIFIKASI (Admin, Staff, Kasubbag) ---
-    Route::middleware(['role:admin,staff,kasubbag'])->group(function () {
-        // Verifikasi & Laporan Pengajuan Online
+    // --- KHUSUS VERIFIKASI (Staff & Admin) ---
+    Route::middleware(['role:staff,admin'])->group(function () {
+        // Verifikasi & Laporan Pengajuan Online (Read Only for Admin)
         Route::get('/admin/pengajuan', [PengajuanController::class, 'indexAdmin'])->name('admin.pengajuan.index');
         Route::get('/admin/pengajuan/export/pdf', [PengajuanController::class, 'exportPdf'])->name('admin.pengajuan.export.pdf');
-        Route::patch('/admin/pengajuan/{id}', [PengajuanController::class, 'verify'])->name('admin.pengajuan.verify');
         Route::get('/admin/pengajuan/{id}/file', [PengajuanController::class, 'viewFileAdmin'])->name('admin.pengajuan.file');
+        
+        // Hanya Staff yang boleh melakukan aksi verifikasi
+        Route::middleware(['role:staff'])->group(function () {
+            Route::patch('/admin/pengajuan/{id}', [PengajuanController::class, 'verify'])->name('admin.pengajuan.verify');
+        });
     });
 
     // --- KHUSUS ADMIN: Manajemen Pengguna ---

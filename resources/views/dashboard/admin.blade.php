@@ -51,6 +51,7 @@
         </div>
 
         <!-- Card Pengajuan -->
+        @if(in_array(Auth::user()->role, ['admin', 'staff']))
         <div class="col-md-3 mb-3">
             <div class="card bg-info text-white h-100">
                 <div class="card-body">
@@ -64,14 +65,71 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
-    <!-- Area Grafik (Nanti bisa pakai Chart.js) -->
-    <div class="card mt-4">
-        <div class="card-header">Statistik Bulanan</div>
+    <!-- Grafis Statistik Bulanan -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Statistik Surat Masuk & Keluar ({{ date('Y') }})</h5>
+        </div>
         <div class="card-body">
-            <p class="text-muted text-center py-5">Grafik Statistik akan tampil di sini.</p>
+            <canvas id="monthlyChart" style="max-height: 400px;"></canvas>
         </div>
     </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        
+        // Data dari Controller
+        const dataMasuk = @json($masukPerBulan);
+        const dataKeluar = @json($keluarPerBulan);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Surat Masuk',
+                        data: dataMasuk,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Surat Keluar',
+                        data: dataKeluar,
+                        backgroundColor: 'rgba(255, 193, 7, 0.7)', // Warna warning/kuning
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    });
+</script>
 </div>
 @endsection
