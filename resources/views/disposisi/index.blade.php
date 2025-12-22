@@ -71,7 +71,7 @@
                             <tbody>
                                 @foreach($disposisiMasuk as $disp)
                                     <tr>
-                                        <td>{{ $disp->pengirim->name }}</td>
+                                        <td>{{ $disp->pengirim->name ?? 'Pengguna Terhapus' }}</td>
                                         <td>
                                             <div class="fw-bold">{{ $disp->suratMasuk->no_surat }}</div>
                                             <small class="text-muted">{{ Str::limit($disp->suratMasuk->perihal, 30) }}</small>
@@ -134,7 +134,7 @@
                                 <tbody>
                                     @foreach($disposisiTerkirim as $disp)
                                         <tr>
-                                            <td>{{ $disp->penerima->name }}</td>
+                                            <td>{{ $disp->penerima->name ?? 'Pengguna Terhapus' }}</td>
                                             <td>{{ $disp->suratMasuk->no_surat }}</td>
                                             <td>{{ Str::limit($disp->instruksi, 40) }}</td>
                                             <td>

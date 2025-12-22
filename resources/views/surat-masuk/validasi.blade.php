@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Validasi Surat Masuk</h2>
+            <h2>Surat Masuk Aktif</h2>
         </div>
 
 
@@ -42,7 +42,7 @@
                                                 $label = 'Menunggu Validasi';
                                                 $badgeClass = 'info';
                                             } elseif ($surat->status == 'menunggu_disposisi') {
-                                                $label = 'Menunggu Disposisi';
+                                                $label = 'Sudah Diteruskan / Menunggu Disposisi';
                                                 $badgeClass = 'warning';
                                             } elseif ($surat->status == 'disposisi') {
                                                 $label = 'Sedang Disposisi';

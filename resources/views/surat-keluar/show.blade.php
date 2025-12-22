@@ -98,7 +98,7 @@
 
             {{-- Form Update Status (Kasubbag & Kepala Unit) --}}
             {{-- Disembunyikan jika status sudah disetujui (siap upload) atau terkirim (selesai) --}}
-            @if(in_array(Auth::user()->role, ['admin', 'kasubbag', 'kepala_unit']) && !in_array($surat->status, ['disetujui', 'terkirim']))
+            @if(in_array(Auth::user()->role, ['admin', 'kasubbag', 'kepala_unit']) && !in_array($surat->status, ['disetujui', 'terkirim']) && !(Auth::user()->role == 'kasubbag' && $surat->status == 'verifikasi'))
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0">Verifikasi & Persetujuan</h5>

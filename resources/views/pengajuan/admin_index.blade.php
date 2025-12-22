@@ -105,7 +105,11 @@
                                 </td>
                                 <td class="px-4 text-center">
                                     <button type="button" class="btn btn-sm btn-info text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalVerify{{ $p->id }}">
-                                        <i class="fas fa-edit me-1"></i> Detail & Verifikasi
+                                        @if(auth()->user()->role == 'staff')
+                                            <i class="fas fa-edit me-1"></i> Detail & Verifikasi
+                                        @else
+                                            <i class="fas fa-eye me-1"></i> Lihat Detail
+                                        @endif
                                     </button>
                                 </td>
                             </tr>
@@ -131,7 +135,7 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title fs-6 fw-bold">
-                    <i class="fas fa-clipboard-check me-2"></i> Verifikasi Pengajuan: {{ $p->no_registrasi }}
+                    <i class="fas fa-clipboard-check me-2"></i> {{ auth()->user()->role == 'staff' ? 'Verifikasi Pengajuan' : 'Detail Pengajuan' }}: {{ $p->no_registrasi }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -167,26 +171,45 @@
                             </tr>
                         </table>
 
-                        <h6 class="fw-bold text-secondary mt-4 mb-3">Form Verifikasi</h6>
-                        <form method="POST" action="{{ route('admin.pengajuan.verify', $p->id) }}" class="p-3 bg-light rounded border">
-                            @csrf
-                            @method('PATCH')
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Update Status</label>
-                                <select name="status" class="form-select" required>
-                                    <option value="menunggu_verifikasi" {{ $p->status == 'menunggu_verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                                    <option value="diterima" {{ $p->status == 'diterima' ? 'selected' : '' }}>Diterima (Setujui)</option>
-                                    <option value="ditolak" {{ $p->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                                </select>
+                        @if(auth()->user()->role == 'staff')
+                            <h6 class="fw-bold text-secondary mt-4 mb-3">Form Verifikasi</h6>
+                            <form method="POST" action="{{ route('admin.pengajuan.verify', $p->id) }}" class="p-3 bg-light rounded border">
+                                @csrf
+                                @method('PATCH')
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Update Status</label>
+                                    <select name="status" class="form-select" required>
+                                        <option value="menunggu_verifikasi" {{ $p->status == 'menunggu_verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                                        <option value="diterima" {{ $p->status == 'diterima' ? 'selected' : '' }}>Diterima (Setujui)</option>
+                                        <option value="ditolak" {{ $p->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Catatan Petugas</label>
+                                    <textarea name="catatan_petugas" class="form-control" rows="3" placeholder="Berikan alasan jika ditolak, atau catatan tambahan...">{{ $p->catatan_petugas }}</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-save me-1"></i> Simpan & Update Status
+                                </button>
+                            </form>
+                        @else
+                            <div class="mt-4 p-3 bg-light rounded border">
+                                <h6 class="fw-bold text-secondary mb-2">Status Saat Ini</h6>
+                                <p class="mb-1">
+                                    Status: 
+                                    @if($p->status == 'menunggu_verifikasi')
+                                        <span class="badge bg-warning text-dark">Menunggu Verifikasi</span>
+                                    @elseif($p->status == 'diterima')
+                                        <span class="badge bg-success">Diterima</span>
+                                    @elseif($p->status == 'ditolak')
+                                        <span class="badge bg-danger">Ditolak</span>
+                                    @endif
+                                </p>
+                                <p class="mb-0 text-muted small">
+                                    Catatan: {{ $p->catatan_petugas ?? '-' }}
+                                </p>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Catatan Petugas</label>
-                                <textarea name="catatan_petugas" class="form-control" rows="3" placeholder="Berikan alasan jika ditolak, atau catatan tambahan...">{{ $p->catatan_petugas }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="fas fa-save me-1"></i> Simpan & Update Status
-                            </button>
-                        </form>
+                        @endif
                     </div>
 
                     {{-- Right Column: History --}}

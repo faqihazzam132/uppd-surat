@@ -23,9 +23,11 @@ class SuratMasukController extends Controller
         $user = Auth::user();
         
         // Filter Strict: Hanya tampilkan surat yang posisinya sedang di user tersebut
-        if ($user->role == 'admin') {
+        // Filter Strict: Admin & Staff bisa memantau semua surat aktif
+        if (in_array($user->role, ['admin', 'staff'])) {
             $surats = SuratMasuk::where('status', '!=', 'selesai')->latest()->get();
         } else {
+            // User lain (Leader) hanya melihat yang ada di meja mereka
             $surats = SuratMasuk::where('posisi', $user->role)
                                 ->where('status', '!=', 'selesai')
                                 ->latest()->get();

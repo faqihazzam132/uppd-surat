@@ -55,23 +55,13 @@
                             <label for="file_draft" class="form-label">Upload Draft Baru (PDF, Opsional)</label>
                             <input type="file" class="form-control @error('file_draft') is-invalid @enderror" id="file_draft" name="file_draft" accept=".pdf">
                             <div class="form-text">Biarkan kosong jika tidak ingin mengubah file draft.</div>
-<<<<<<< HEAD
+                            
                             @if($surat->file_draft)
-                                <div class="mt-2">
-                                    <small>File saat ini: <a href="{{ asset('storage/' . $surat->file_draft) }}" target="_blank">Lihat Draft</a></small>
-                                </div>
-=======
-                            @if($surat->file_draft && \Illuminate\Support\Facades\Storage::disk('public')->exists($surat->file_draft))
                                 <div class="mt-2">
                                     <small>File saat ini: <a href="{{ route('surat-keluar.draft', $surat->id) }}" target="_blank">Lihat Draft</a></small>
                                 </div>
-                            @elseif($surat->file_draft)
-                                <div class="mt-2">
-                                    <small class="text-danger">File draft tercatat tapi tidak ditemukan di penyimpanan.</small>
-                                </div>
                             @endif
->>>>>>> f03a87a4fb0dafc461bcf9335dc2a4e0e9e4d43c
-                            @endif
+
                             @error('file_draft')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
