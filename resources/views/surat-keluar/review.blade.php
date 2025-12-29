@@ -43,7 +43,7 @@
                                         <div class="d-flex gap-1">
                                             {{-- Lihat Dokumen --}}
                                             <a href="{{ route('surat-keluar.draft', $surat->id) }}" target="_blank" class="btn btn-sm btn-info text-white" title="Lihat Draft">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="fas fa-file-alt"></i>
                                             </a>
 
                                             {{-- Tindak Lanjut --}}

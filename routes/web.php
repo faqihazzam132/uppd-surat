@@ -16,9 +16,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 |--------------------------------------------------------------------------
 */
 
-// --- PUBLIC TRACKING ---
-Route::get('/tracking', [\App\Http\Controllers\TrackingController::class, 'index'])->name('tracking.index');
-Route::post('/tracking', [\App\Http\Controllers\TrackingController::class, 'search'])->name('tracking.search');
+
 
 // --- HALAMAN DEPAN & AUTHENTICATION ---
 Route::get('/', function () {

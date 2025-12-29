@@ -68,9 +68,26 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('arsip.show', $arsip->id) }}" class="btn btn-sm btn-info text-white">
-                                    Detail
+                                <a href="{{ route('arsip.show', $arsip->id) }}" class="btn btn-sm btn-info text-white" title="Detail">
+                                    <i class="fas fa-info-circle"></i>
                                 </a>
+
+                                {{-- Tombol Download --}}
+                                @if($arsip->surat)
+                                    @php
+                                        $downloadRoute = '#';
+                                        if ($arsip->surat_type == 'App\Models\SuratMasuk') {
+                                            $downloadRoute = route('surat-masuk.download', $arsip->surat->id);
+                                        } elseif ($arsip->surat_type == 'App\Models\SuratKeluar') {
+                                            $downloadRoute = route('surat-keluar.download', $arsip->surat->id);
+                                        }
+                                    @endphp
+                                    @if($downloadRoute != '#')
+                                        <a href="{{ $downloadRoute }}" class="btn btn-sm btn-success text-white" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    @endif
+                                @endif
                                 @if(in_array(Auth::user()->role, ['admin', 'staff']))
                                     <form action="{{ route('arsip.destroy', $arsip->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus arsip ini?')">
                                         @csrf

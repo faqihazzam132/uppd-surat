@@ -16,8 +16,16 @@ class DashboardController extends Controller
 
         if ($user->role == 'pemohon') {
             // Dashboard Pemohon: Lihat pengajuan sendiri
-            $pengajuans = Pengajuan::where('user_id', $user->id)->get();
-            return view('dashboard.pemohon', compact('pengajuans'));
+            $pengajuans = Pengajuan::where('user_id', $user->id)->latest()->take(5)->get(); // Limit 5 for dashboard
+            
+            $stats = [
+                'total' => Pengajuan::where('user_id', $user->id)->count(),
+                'menunggu' => Pengajuan::where('user_id', $user->id)->where('status', 'menunggu_verifikasi')->count(),
+                'diterima' => Pengajuan::where('user_id', $user->id)->where('status', 'diterima')->count(),
+                'ditolak' => Pengajuan::where('user_id', $user->id)->where('status', 'ditolak')->count(),
+            ];
+
+            return view('dashboard.pemohon', compact('pengajuans', 'stats'));
         } else {
             // Dashboard Admin/Staff: Statistik
             $totalMasuk = SuratMasuk::count();
