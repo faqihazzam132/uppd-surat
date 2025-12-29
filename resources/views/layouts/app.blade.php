@@ -145,6 +145,12 @@
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
 
+                @if(auth()->user()->role == 'pemohon')
+                    <a href="{{ route('pengajuan.index') }}" class="{{ request()->is('pengajuan*') ? 'active' : '' }}">
+                        <i class="fas fa-file-contract"></i> Permohonan Saya
+                    </a>
+                @endif
+
                 <!-- Menu Internal (Admin/Staff) -->
                 @if(auth()->user()->role != 'pemohon')
                     <small class="text-muted d-block">Administrasi</small>

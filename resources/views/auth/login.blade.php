@@ -46,9 +46,7 @@
         <div class="text-center">
             <p class="small">Belum punya akun?</p>
             <a href="{{ route('register') }}" class="btn btn-outline-secondary w-100 mb-2">Daftar Akun Pemohon</a>
-            <a href="{{ route('tracking.index') }}" class="btn btn-link w-100 text-decoration-none">
-                <i class="fas fa-search me-1"></i> Lacak Surat / Dokumen
-            </a>
+
         </div>
     </div>
 

@@ -68,7 +68,7 @@ class SuratMasukController extends Controller
             'file_path' => $path,
             'user_id' => Auth::id(),
             'posisi' => 'staff', // Default position
-            'status' => 'menunggu_validasi', // Initial status
+            'status' => 'baru', // Initial status
         ]);
 
         return redirect()->route('surat-masuk.validasi')->with('success', 'Surat Masuk berhasil dicatat!');

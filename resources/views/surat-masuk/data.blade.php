@@ -51,7 +51,7 @@
                                         <div class="d-flex flex-wrap gap-1">
                                             <a href="{{ route('surat-masuk.show', $surat) }}"
                                                 class="btn btn-sm btn-info text-white" title="Detail">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="fas fa-info-circle"></i>
                                             </a>
                                             <a href="{{ route('surat-masuk.download', $surat->id) }}"
                                                 class="btn btn-sm btn-secondary text-white" title="Download">

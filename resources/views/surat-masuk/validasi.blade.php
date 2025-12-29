@@ -38,8 +38,8 @@
                                             $label = 'Baru';
                                             
                                             // Mapping status to user requested labels
-                                            if ($surat->status == 'menunggu_validasi') {
-                                                $label = 'Menunggu Validasi';
+                                            if ($surat->status == 'menunggu_validasi' || $surat->status == 'baru') {
+                                                $label = 'Baru';
                                                 $badgeClass = 'info';
                                             } elseif ($surat->status == 'menunggu_disposisi') {
                                                 $label = 'Sudah Diteruskan / Menunggu Disposisi';
@@ -68,28 +68,28 @@
                                             @if($surat->file_path)
                                                 <a href="{{ route('surat-masuk.view-file', $surat->id) }}" target="_blank"
                                                     class="btn btn-sm btn-info text-white shadow-sm" title="Lihat Dokumen">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="fas fa-file-alt"></i>
                                                 </a>
                                             @else
-                                                <button class="btn btn-sm btn-secondary" disabled><i class="fas fa-eye-slash"></i></button>
+                                                <button class="btn btn-sm btn-secondary" disabled><i class="fas fa-file-excel"></i></button>
                                             @endif
                                             
                                             {{-- Tombol Teruskan (Staff) --}}
                                             @if($surat->posisi == 'staff')
-                                                <a href="{{ route('surat-masuk.show', $surat) }}" class="btn btn-sm btn-warning shadow-sm px-3 fw-bold" title="Teruskan Surat">
+                                                <a href="{{ route('surat-masuk.show', $surat) }}" class="btn btn-sm btn-warning shadow-sm" title="Teruskan Surat">
                                                     <i class="fas fa-share me-1"></i> Teruskan
                                                 </a>
                                             
                                             {{-- Tombol Disposisi & Selesai (Leader) --}}
                                             @elseif(in_array(Auth::user()->role, ['kepala_unit', 'kasubbag']) && $surat->posisi == Auth::user()->role)
-                                                <a href="{{ route('disposisi.create', $surat->id) }}" class="btn btn-sm btn-primary shadow-sm px-3" title="Disposisi">
+                                                <a href="{{ route('disposisi.create', $surat->id) }}" class="btn btn-sm btn-primary shadow-sm" title="Disposisi">
                                                     <i class="fas fa-paper-plane me-1"></i> Disposisi
                                                 </a>
                                                 
                                                 <form action="{{ route('surat-masuk.selesai', $surat->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" class="btn btn-sm btn-success shadow-sm px-3" 
+                                                    <button type="submit" class="btn btn-sm btn-success shadow-sm" 
                                                             onclick="return confirm('Apakah Anda yakin ingin menyelesaikan surat ini?')"
                                                             title="Selesai">
                                                         <i class="fas fa-check me-1"></i> Selesai

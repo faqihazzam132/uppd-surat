@@ -33,7 +33,7 @@
                                     <td>
                                         <div class="d-flex gap-1">
                                             {{-- Detail (Semua Role) --}}
-                                            <a href="{{ route('surat-keluar.show', $surat) }}" class="btn btn-sm btn-secondary text-white" title="Detail">
+                                            <a href="{{ route('surat-keluar.show', $surat) }}" class="btn btn-sm btn-info text-white" title="Detail">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
 

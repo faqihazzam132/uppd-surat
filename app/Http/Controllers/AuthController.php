@@ -29,7 +29,7 @@ class AuthController extends Controller
             // Redirect sesuai role
             $role = Auth::user()->role;
             if ($role == 'pemohon') {
-                return redirect()->route('pengajuan.index');
+                return redirect()->route('dashboard');
             }
 
             // Untuk admin/staff/kepala_unit/kasubbag arahkan ke dashboard umum
