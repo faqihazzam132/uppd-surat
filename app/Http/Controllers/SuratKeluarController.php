@@ -44,29 +44,23 @@ class SuratKeluarController extends Controller
     public function review()
     {
         $user = Auth::user();
-        $surats = collect();
+        // Logic Query Builder agar bisa disort global
+        $query = SuratKeluar::query();
+        $statuses = [];
 
         if ($user->role == 'kasubbag' || $user->role == 'admin') {
-            // Kasubbag Review: Draft (Baru dari Staff) atau Revisi (Jika ada trouble)
-            // Revisi biasanya balik ke Staff, tapi Verifikator perlu lihat?
-            // Prompt: "Review... berisi daftar yang harus direview" -> Actionable items
-            // Actionable for Kasubbag: 'draft' sent by Staff.
-            $surats = SuratKeluar::whereIn('status', ['draft'])->latest()->get();
-            
-            // Note: Jika 'revisi', itu artinya dikembalikan ke Staff, jadi bukan tugas Kasubbag saat ini.
-            // Kecuali jika dikembalikan oleh Ka. Unit ke Kasubbag? (status 'revisi' + tujuan 'kasubbag')
-            // Kita coba tambahkan logic itu jika field 'tujuan_revisi' ada (tapi database belum tentu record siapa tujuannya di kolom terpisah selain logs).
-            // Simplifikasi: Kasubbag tugasnya memverifikasi Draft baru.
-        } 
+            $statuses = array_merge($statuses, ['draft']);
+        }
         
         if ($user->role == 'kepala_unit' || $user->role == 'admin') {
-            // Kepala Unit Review: 'verifikasi' (Dari Kasubbag) dan 'disetujui' (Butuh Upload Final)
-            $surats = $surats->merge(SuratKeluar::whereIn('status', ['verifikasi', 'disetujui'])->latest()->get());
+            $statuses = array_merge($statuses, ['verifikasi', 'disetujui']);
         }
 
         if ($user->role == 'staff') {
             abort(403); 
         }
+
+        $surats = $query->whereIn('status', $statuses)->latest()->get();
 
         return view('surat-keluar.review', compact('surats'));
     }

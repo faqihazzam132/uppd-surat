@@ -14,6 +14,16 @@
         <p class="text-muted">Buat akun untuk mengajukan surat online</p>
     </div>
 
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('register') }}" method="POST">
         @csrf
         <div class="mb-3">
