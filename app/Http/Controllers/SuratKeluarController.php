@@ -49,7 +49,8 @@ class SuratKeluarController extends Controller
         $statuses = [];
 
         if ($user->role == 'kasubbag' || $user->role == 'admin') {
-            $statuses = array_merge($statuses, ['draft']);
+            // Kasubbag melihat Draft (dari Staff) DAN Revisi (dari Kepala Unit)
+            $statuses = array_merge($statuses, ['draft', 'revisi']);
         }
         
         if ($user->role == 'kepala_unit' || $user->role == 'admin') {
@@ -68,12 +69,21 @@ class SuratKeluarController extends Controller
     // 2. Form Buat Surat Keluar Baru
     public function create()
     {
+        // Hanya Staff yang boleh membuat surat keluar
+        if (Auth::user()->role !== 'staff' && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
         return view('surat-keluar.create');
     }
 
     // 3. Simpan Draft Surat Keluar
     public function store(Request $request)
     {
+        // Hanya Staff yang boleh simpan surat keluar
+        if (Auth::user()->role !== 'staff' && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $request->validate([
             'tujuan' => 'required',
             'perihal' => 'required',
@@ -128,13 +138,17 @@ class SuratKeluarController extends Controller
         
         // Cek Hak Akses Edit
         $canEdit = false;
+        
+        // Admin selalu bisa
         if ($user->role == 'admin') {
             $canEdit = true;
-        } elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
+        } 
+        // Staff hanya bisa jika status draft atau revisi
+        elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
             $canEdit = true;
-        } elseif ($user->role == 'kasubbag' && $surat->status == 'revisi') {
-            $canEdit = true;
-        }
+        } 
+        
+        // HAPUS logic Kasubbag edit
 
         if (!$canEdit) {
             return redirect()->route('surat-keluar.show', $id)->with('error', 'Anda tidak memiliki izin untuk mengedit surat ini saat ini.');
@@ -150,13 +164,14 @@ class SuratKeluarController extends Controller
 
         // Cek Hak Akses Update (Sama dengan Edit)
         $canEdit = false;
+        
         if ($user->role == 'admin') {
             $canEdit = true;
-        } elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
+        } 
+        elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
             $canEdit = true;
-        } elseif ($user->role == 'kasubbag' && $surat->status == 'revisi') {
-            $canEdit = true;
-        }
+        } 
+        // HAPUS logic Kasubbag update
 
         if (!$canEdit) {
             return redirect()->route('surat-keluar.show', $id)->with('error', 'Surat tidak dapat diedit.');
@@ -187,9 +202,9 @@ class SuratKeluarController extends Controller
         
         // Logika Perubahan Status setelah Edit
         if ($surat->status == 'revisi') {
-            // Jika yang edit Staff -> Status jadi 'verifikasi' (Kirim ke Kasubbag)
+            // Jika yang edit Staff -> Status jadi 'draft' lagi (Agar Kasubbag bisa review ulang)
             if ($user->role == 'staff') {
-                $data['status'] = 'verifikasi';
+                $data['status'] = 'draft';
                 
                 // Notifikasi ke Kasubbag
                 $kasubbags = User::where('role', 'kasubbag')->get();
