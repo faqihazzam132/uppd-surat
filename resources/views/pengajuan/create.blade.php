@@ -16,11 +16,14 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Jenis Permohonan Surat</label>
                             <select name="jenis_surat" class="form-select" required>
-                                <option value="">-- Pilih Jenis Surat --</option>
-                                <option value="Surat Keterangan Domisili">Surat Keterangan Domisili</option>
-                                <option value="Surat Pengantar KTP">Surat Pengantar KTP</option>
-                                <option value="Surat Keterangan Usaha">Surat Keterangan Usaha</option>
-                                <option value="Surat Keterangan Tidak Mampu">Surat Keterangan Tidak Mampu</option>
+                                <option value="">-- Pilih Jenis Permohonan --</option>
+                                <option value="Permohonan Salinan SPPT PBB">Permohonan Salinan SPPT PBB</option>
+                                <option value="Permohonan Mutasi / Balik Nama PBB">Permohonan Mutasi / Balik Nama PBB</option>
+                                <option value="Permohonan Pengurangan PBB-P2">Permohonan Pengurangan PBB-P2</option>
+                                <option value="Permohonan Surat Keterangan NJOP">Permohonan Surat Keterangan NJOP</option>
+                                <option value="Permohonan Pembetulan SKPD">Permohonan Pembetulan SKPD</option>
+                                <option value="Permohonan Angsuran Pajak Daerah">Permohonan Angsuran Pajak Daerah</option>
+                                <option value="Permohonan Keberatan Pajak">Permohonan Keberatan Pajak</option>
                                 <option value="Lainnya">Lainnya</option>
                             </select>
                         </div>
@@ -34,9 +37,40 @@
                         <!-- Upload File -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">Upload Berkas Pendukung (KTP/KK)</label>
-                            <input type="file" name="file_syarat" class="form-control" required accept=".pdf,.jpg,.png,.jpeg">
-                            <div class="form-text text-muted">Format: PDF, JPG, PNG. Maksimal 2MB.</div>
+                            
+                            <div id="file-inputs-container">
+                                <div class="input-group mb-2">
+                                    <input type="file" name="file_syarat[]" class="form-control" required accept=".pdf,.jpg,.png,.jpeg">
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-primary btn-sm mb-2" id="add-file-btn">
+                                <i class="fas fa-plus"></i> Tambah Dokumen Lain
+                            </button>
+
+                            <div class="form-text text-muted">Format: PDF, JPG, PNG. Maksimal 2MB per file.</div>
                         </div>
+
+                        <script>
+                            document.getElementById('add-file-btn').addEventListener('click', function() {
+                                var container = document.getElementById('file-inputs-container');
+                                var div = document.createElement('div');
+                                div.className = 'input-group mb-2';
+                                div.innerHTML = `
+                                    <input type="file" name="file_syarat[]" class="form-control" required accept=".pdf,.jpg,.png,.jpeg">
+                                    <button type="button" class="btn btn-outline-danger remove-file-btn" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `;
+                                container.appendChild(div);
+                            });
+
+                            document.addEventListener('click', function(e) {
+                                if (e.target.closest('.remove-file-btn')) {
+                                    e.target.closest('.remove-file-btn').parentElement.remove();
+                                }
+                            });
+                        </script>
 
                         <!-- Tombol Aksi -->
                         <div class="d-flex justify-content-between">

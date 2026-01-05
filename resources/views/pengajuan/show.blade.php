@@ -33,9 +33,28 @@
             </div>
             <div class="mb-3">
                 <strong>Berkas Syarat:</strong><br>
-                <a href="{{ route('pengajuan.file', $pengajuan->id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                    Lihat Berkas
-                </a>
+                @php
+                    $files = $pengajuan->file_syarat;
+                    // Fallback untuk data lama (string path) jika casting gagal/belum JSON
+                    if (empty($files) && $pengajuan->getRawOriginal('file_syarat')) {
+                        $files = [$pengajuan->getRawOriginal('file_syarat')];
+                    }
+                    if (is_string($files)) {
+                        $files = [$files];
+                    }
+                @endphp
+
+                @if(!empty($files))
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach($files as $index => $file)
+                            <a href="{{ route('pengajuan.file', ['id' => $pengajuan->id, 'index' => $index]) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-file-download me-1"></i> File {{ $index + 1 }}
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <span class="text-muted fst-italic">Tidak ada dokumen dilampirkan.</span>
+                @endif
             </div>
             <div class="mt-4">
                 <a href="{{ route('pengajuan.bukti', $pengajuan->id) }}" class="btn btn-success" target="_blank">

@@ -44,29 +44,24 @@ class SuratKeluarController extends Controller
     public function review()
     {
         $user = Auth::user();
-        $surats = collect();
+        // Logic Query Builder agar bisa disort global
+        $query = SuratKeluar::query();
+        $statuses = [];
 
         if ($user->role == 'kasubbag' || $user->role == 'admin') {
-            // Kasubbag Review: Draft (Baru dari Staff) atau Revisi (Jika ada trouble)
-            // Revisi biasanya balik ke Staff, tapi Verifikator perlu lihat?
-            // Prompt: "Review... berisi daftar yang harus direview" -> Actionable items
-            // Actionable for Kasubbag: 'draft' sent by Staff.
-            $surats = SuratKeluar::whereIn('status', ['draft'])->latest()->get();
-            
-            // Note: Jika 'revisi', itu artinya dikembalikan ke Staff, jadi bukan tugas Kasubbag saat ini.
-            // Kecuali jika dikembalikan oleh Ka. Unit ke Kasubbag? (status 'revisi' + tujuan 'kasubbag')
-            // Kita coba tambahkan logic itu jika field 'tujuan_revisi' ada (tapi database belum tentu record siapa tujuannya di kolom terpisah selain logs).
-            // Simplifikasi: Kasubbag tugasnya memverifikasi Draft baru.
-        } 
+            // Kasubbag melihat Draft (dari Staff) DAN Revisi (dari Kepala Unit)
+            $statuses = array_merge($statuses, ['draft', 'revisi']);
+        }
         
         if ($user->role == 'kepala_unit' || $user->role == 'admin') {
-            // Kepala Unit Review: 'verifikasi' (Dari Kasubbag) dan 'disetujui' (Butuh Upload Final)
-            $surats = $surats->merge(SuratKeluar::whereIn('status', ['verifikasi', 'disetujui'])->latest()->get());
+            $statuses = array_merge($statuses, ['verifikasi', 'disetujui']);
         }
 
         if ($user->role == 'staff') {
             abort(403); 
         }
+
+        $surats = $query->whereIn('status', $statuses)->latest()->get();
 
         return view('surat-keluar.review', compact('surats'));
     }
@@ -74,12 +69,21 @@ class SuratKeluarController extends Controller
     // 2. Form Buat Surat Keluar Baru
     public function create()
     {
+        // Hanya Staff yang boleh membuat surat keluar
+        if (Auth::user()->role !== 'staff' && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
         return view('surat-keluar.create');
     }
 
     // 3. Simpan Draft Surat Keluar
     public function store(Request $request)
     {
+        // Hanya Staff yang boleh simpan surat keluar
+        if (Auth::user()->role !== 'staff' && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $request->validate([
             'tujuan' => 'required',
             'perihal' => 'required',
@@ -134,13 +138,17 @@ class SuratKeluarController extends Controller
         
         // Cek Hak Akses Edit
         $canEdit = false;
+        
+        // Admin selalu bisa
         if ($user->role == 'admin') {
             $canEdit = true;
-        } elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
+        } 
+        // Staff hanya bisa jika status draft atau revisi
+        elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
             $canEdit = true;
-        } elseif ($user->role == 'kasubbag' && $surat->status == 'revisi') {
-            $canEdit = true;
-        }
+        } 
+        
+        // HAPUS logic Kasubbag edit
 
         if (!$canEdit) {
             return redirect()->route('surat-keluar.show', $id)->with('error', 'Anda tidak memiliki izin untuk mengedit surat ini saat ini.');
@@ -156,13 +164,14 @@ class SuratKeluarController extends Controller
 
         // Cek Hak Akses Update (Sama dengan Edit)
         $canEdit = false;
+        
         if ($user->role == 'admin') {
             $canEdit = true;
-        } elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
+        } 
+        elseif ($user->role == 'staff' && in_array($surat->status, ['draft', 'revisi'])) {
             $canEdit = true;
-        } elseif ($user->role == 'kasubbag' && $surat->status == 'revisi') {
-            $canEdit = true;
-        }
+        } 
+        // HAPUS logic Kasubbag update
 
         if (!$canEdit) {
             return redirect()->route('surat-keluar.show', $id)->with('error', 'Surat tidak dapat diedit.');
@@ -193,9 +202,9 @@ class SuratKeluarController extends Controller
         
         // Logika Perubahan Status setelah Edit
         if ($surat->status == 'revisi') {
-            // Jika yang edit Staff -> Status jadi 'verifikasi' (Kirim ke Kasubbag)
+            // Jika yang edit Staff -> Status jadi 'draft' lagi (Agar Kasubbag bisa review ulang)
             if ($user->role == 'staff') {
-                $data['status'] = 'verifikasi';
+                $data['status'] = 'draft';
                 
                 // Notifikasi ke Kasubbag
                 $kasubbags = User::where('role', 'kasubbag')->get();

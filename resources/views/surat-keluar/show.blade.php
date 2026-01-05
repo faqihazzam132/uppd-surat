@@ -7,8 +7,8 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Detail Surat Keluar</h2>
                 <div>
-                    {{-- Tombol Edit: Muncul untuk Staff (Draft/Revisi) ATAU Kasubbag (Revisi) --}}
-                    @if((in_array($surat->status, ['draft', 'revisi']) && Auth::user()->role == 'staff') || ($surat->status == 'revisi' && Auth::user()->role == 'kasubbag') || Auth::user()->role == 'admin')
+                    {{-- Tombol Edit: Muncul HANYA untuk Staff (Draft/Revisi) atau Admin --}}
+                    @if((in_array($surat->status, ['draft', 'revisi']) && Auth::user()->role == 'staff') || Auth::user()->role == 'admin')
                         <a href="{{ route('surat-keluar.edit', $surat->id) }}" class="btn btn-warning me-2">
                             <i class="fas fa-edit me-1"></i> Edit
                         </a>

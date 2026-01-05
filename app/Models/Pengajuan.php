@@ -20,6 +20,10 @@ class Pengajuan extends Model
         'catatan_petugas',
     ];
 
+    protected $casts = [
+        'file_syarat' => 'array',
+    ];
+
     // Pengajuan dimiliki oleh satu User (Pemohon)
     public function user()
     {

@@ -30,7 +30,7 @@ class DisposisiController extends Controller
 
         if ($user->role === 'kepala_unit') {
             // FR-D-01: Kepala Unit melihat surat masuk "Menunggu Disposisi"
-            $suratBelumDisposisi = SuratMasuk::where('status', 'menunggu_disposisi')->get();
+            $suratBelumDisposisi = SuratMasuk::where('status', 'menunggu_disposisi')->latest()->get();
 
             // Log disposisi yang sudah dikirim
             $disposisiTerkirim = Disposisi::where('pengirim_id', $user->id)

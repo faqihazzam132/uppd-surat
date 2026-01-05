@@ -52,7 +52,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'nik' => 'required|numeric|unique:users',
+            'nik' => 'required|numeric|digits:16|unique:users',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6|confirmed',
             'no_hp' => 'required',
