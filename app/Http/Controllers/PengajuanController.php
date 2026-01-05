@@ -34,11 +34,17 @@ class PengajuanController extends Controller
         $request->validate([
             'jenis_surat' => 'required',
             'keterangan' => 'required',
-            'file_syarat' => 'required|file|mimes:pdf,jpg,png|max:2048',
+            'file_syarat' => 'required',
+            'file_syarat.*' => 'file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-        // Upload file syarat
-        $path = $request->file('file_syarat')->store('syarat-pengajuan', 'public');
+        // Upload file syarat (Support Multiple)
+        $paths = [];
+        if ($request->hasFile('file_syarat')) {
+            foreach ($request->file('file_syarat') as $file) {
+                $paths[] = $file->store('syarat-pengajuan', 'public');
+            }
+        }
 
         // Generate No Registrasi Unik (Contoh: REG-20231025-X7Z)
         $no_registrasi = 'REG-' . date('Ymd') . '-' . strtoupper(Str::random(3));
@@ -48,7 +54,7 @@ class PengajuanController extends Controller
             'user_id' => Auth::id(),
             'jenis_surat' => $request->jenis_surat,
             'keterangan' => $request->keterangan,
-            'file_syarat' => $path,
+            'file_syarat' => $paths,
             'status' => 'menunggu_verifikasi',
         ]);
 
@@ -99,13 +105,29 @@ class PengajuanController extends Controller
     }
 
     // 5. Lihat berkas syarat (hanya untuk pemilik pengajuan)
-    public function viewFile($id)
+    // 5. Lihat berkas syarat (hanya untuk pemilik pengajuan)
+    public function viewFile(Request $request, $id)
     {
         $pengajuan = Pengajuan::where('id', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        $filePath = storage_path('app/public/'.$pengajuan->file_syarat);
+        $files = $pengajuan->file_syarat;
+        
+        // Handle legacy data (string) or new data (array)
+        if (is_string($files)) {
+            $files = [$files];
+        } elseif (is_null($files)) {
+            $files = [];
+        }
+
+        $index = $request->query('index', 0);
+        
+        if (!isset($files[$index])) {
+            abort(404);
+        }
+
+        $filePath = storage_path('app/public/' . $files[$index]);
 
         if (!file_exists($filePath)) {
             abort(404);
@@ -115,11 +137,27 @@ class PengajuanController extends Controller
     }
 
     // 5b. Lihat berkas syarat (untuk Admin/Staff - tanpa batasan pemilik)
-    public function viewFileAdmin($id)
+    // 5b. Lihat berkas syarat (untuk Admin/Staff - tanpa batasan pemilik)
+    public function viewFileAdmin(Request $request, $id)
     {
         $pengajuan = Pengajuan::findOrFail($id);
 
-        $filePath = storage_path('app/public/'.$pengajuan->file_syarat);
+        $files = $pengajuan->file_syarat;
+        
+        // Handle legacy data (string) or new data (array)
+        if (is_string($files)) {
+            $files = [$files];
+        } elseif (is_null($files)) {
+            $files = [];
+        }
+
+        $index = $request->query('index', 0);
+        
+        if (!isset($files[$index])) {
+            abort(404);
+        }
+
+        $filePath = storage_path('app/public/' . $files[$index]);
 
         if (!file_exists($filePath)) {
             abort(404);

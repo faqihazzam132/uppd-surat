@@ -160,10 +160,25 @@
                             <tr>
                                 <td class="text-muted">File Syarat</td>
                                 <td>
-                                    @if($p->file_syarat)
-                                        <a href="{{ route('admin.pengajuan.file', $p->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                            <i class="fas fa-file-download me-1"></i> Lihat Dokumen
-                                        </a>
+                                    @php
+                                        $files = $p->file_syarat;
+                                        // Fallback legacy data
+                                        if (empty($files) && $p->getRawOriginal('file_syarat')) {
+                                            $files = [$p->getRawOriginal('file_syarat')];
+                                        }
+                                        if (is_string($files)) {
+                                            $files = [$files];
+                                        }
+                                    @endphp
+
+                                    @if(!empty($files))
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach($files as $index => $file)
+                                                <a href="{{ route('admin.pengajuan.file', ['id' => $p->id, 'index' => $index]) }}" class="btn btn-sm btn-outline-primary px-2" target="_blank" title="Lihat Dokumen {{ $index+1 }}">
+                                                    <i class="fas fa-file-download"></i> File {{ $index+1 }}
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     @else
                                         <span class="badge bg-secondary">Tidak ada file</span>
                                     @endif

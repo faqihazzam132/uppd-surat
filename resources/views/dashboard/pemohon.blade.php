@@ -7,9 +7,7 @@
             <h2 class="mb-1">Dashboard Pemohon</h2>
             <p class="text-muted">Selamat datang kembali, {{ Auth::user()->name }}!</p>
         </div>
-        <a href="{{ route('pengajuan.create') }}" class="btn btn-primary shadow-sm">
-            <i class="fas fa-plus me-1"></i> Buat Pengajuan Baru
-        </a>
+
     </div>
 
     <!-- Stats Cards -->
