@@ -1,0 +1,19 @@
+--- Recent Pengajuan (Limit 5) ---
+[20] Reg: REG-20260108-AUG | Status: diterima | User: yohana pemohon (14)
+[19] Reg: REG-20260108-T8S | Status: menunggu_verifikasi | User: yohana pemohon (14)
+[18] Reg: REG-20260108-NQQ | Status: menunggu_verifikasi | User: yohana pemohon (14)
+[17] Reg: REG-20260108-VIP | Status: menunggu_verifikasi | User: yohana pemohon (14)
+[16] Reg: REG-20260108-543 | Status: diterima | User: yohana pemohon (14)
+
+--- Users (Limit 5) ---
+[1] Faqih Muhammad 'Azzam Falahi | Role: pemohon | Email: faqihazzam132@gmail.com
+[2] Admin UPPD | Role: admin | Email: admin@example.com
+[6] GUSPA RIYADI | Role: pemohon | Email: guspa12@gmail.com
+[7] Bapak Kepala Unit | Role: kepala_unit | Email: kaunit@uppd.com
+[8] Ibu Kasubbag TU | Role: kasubbag | Email: kasubbag@uppd.com
+[9] Staff Administrasi | Role: staff | Email: staff@uppd.com
+[10] Administrator | Role: admin | Email: admin@uppd.com
+[11] yoh | Role: staff | Email: yohstaff@gmail.com
+[13] yohana kepala unit | Role: kepala_unit | Email: yohka@gmail.com
+[14] yohana pemohon | Role: pemohon | Email: yohpemohon@gmail.com
+[15] sssssssss | Role: pemohon | Email: yomoera@gmail.com

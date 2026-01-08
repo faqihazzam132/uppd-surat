@@ -278,7 +278,7 @@ class PengajuanController extends Controller
                     'pengirim'         => optional($pengajuan->user)->name,
                     'perihal'          => $pengajuan->jenis_surat,
                     'sifat'            => $pengajuan->status === 'diterima' ? 'biasa' : null,
-                    'file_path'        => $pengajuan->file_syarat,
+                    'file_path'        => isset($pengajuan->file_syarat[0]) ? $pengajuan->file_syarat[0] : null,
                     'status'           => 'baru',
                     'user_id'          => Auth::id(),
                 ]);
