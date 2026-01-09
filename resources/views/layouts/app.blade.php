@@ -161,53 +161,56 @@
                         </a>
                     @endif
 
-                    {{-- Menu Dropdown Surat Masuk --}}
-                    <a href="#submenuSuratMasuk" data-bs-toggle="collapse" class="{{ request()->is('surat-masuk*') ? 'active' : 'collapsed' }}" aria-expanded="{{ request()->is('surat-masuk*') ? 'true' : 'false' }}">
-                        <i class="fas fa-inbox"></i> Surat Masuk <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8rem;"></i>
-                    </a>
-                    <div class="collapse {{ request()->is('surat-masuk*') ? 'show' : '' }}" id="submenuSuratMasuk">
-                        @if(in_array(auth()->user()->role, ['admin', 'staff']))
-                            <a href="{{ route('surat-masuk.create') }}" class="{{ request()->routeIs('surat-masuk.create') ? 'active' : '' }}">
-                                Buat Surat Masuk
-                            </a>
-                        @endif
-                        <a href="{{ route('surat-masuk.validasi') }}" class="{{ request()->routeIs('surat-masuk.validasi') ? 'active' : '' }}">
-                            Surat Masuk Aktif
+                    {{-- Menu Operasional (Staff, Kepala Unit, Kasubbag) --}}
+                    @if(auth()->user()->role != 'admin')
+                        {{-- Menu Dropdown Surat Masuk --}}
+                        <a href="#submenuSuratMasuk" data-bs-toggle="collapse" class="{{ request()->is('surat-masuk*') ? 'active' : 'collapsed' }}" aria-expanded="{{ request()->is('surat-masuk*') ? 'true' : 'false' }}">
+                            <i class="fas fa-inbox"></i> Surat Masuk <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8rem;"></i>
                         </a>
-                        <a href="{{ route('surat-masuk.index') }}" class="{{ request()->routeIs('surat-masuk.index') ? 'active' : '' }}">
-                            Data Surat Masuk
+                        <div class="collapse {{ request()->is('surat-masuk*') ? 'show' : '' }}" id="submenuSuratMasuk">
+                            @if(auth()->user()->role == 'staff')
+                                <a href="{{ route('surat-masuk.create') }}" class="{{ request()->routeIs('surat-masuk.create') ? 'active' : '' }}">
+                                    Buat Surat Masuk
+                                </a>
+                            @endif
+                            <a href="{{ route('surat-masuk.validasi') }}" class="{{ request()->routeIs('surat-masuk.validasi') ? 'active' : '' }}">
+                                Surat Masuk Aktif
+                            </a>
+                            <a href="{{ route('surat-masuk.index') }}" class="{{ request()->routeIs('surat-masuk.index') ? 'active' : '' }}">
+                                Data Surat Masuk
+                            </a>
+                        </div>
+
+                        <a href="{{ route('disposisi.index') }}" class="{{ request()->is('disposisi*') ? 'active' : '' }}">
+                            <i class="fas fa-share-square"></i> Disposisi
                         </a>
-                    </div>
 
-                    <a href="{{ route('disposisi.index') }}" class="{{ request()->is('disposisi*') ? 'active' : '' }}">
-                        <i class="fas fa-share-square"></i> Disposisi
-                    </a>
-
-                    {{-- Logic Menu Surat Keluar --}}
-                    <a href="#submenuSuratKeluar" data-bs-toggle="collapse" class="{{ request()->is('surat-keluar*') ? 'active' : 'collapsed' }}" aria-expanded="{{ request()->is('surat-keluar*') ? 'true' : 'false' }}">
-                        <i class="fas fa-paper-plane"></i> Surat Keluar <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8rem;"></i>
-                    </a>
-                    <div class="collapse {{ request()->is('surat-keluar*') ? 'show' : '' }}" id="submenuSuratKeluar">
-                        
-                        @if(Auth::user()->role == 'staff')
-                            <a href="{{ route('surat-keluar.create') }}" class="{{ request()->routeIs('surat-keluar.create') ? 'active' : '' }}">
-                                Buat Surat Keluar
-                            </a>
-                            <a href="{{ route('surat-keluar.aktif') }}" class="{{ request()->routeIs('surat-keluar.aktif') ? 'active' : '' }}">
-                                Surat Keluar Aktif
-                            </a>
-                            <a href="{{ route('surat-keluar.index') }}" class="{{ request()->routeIs('surat-keluar.index') ? 'active' : '' }}">
-                                Data Surat Keluar
-                            </a>
-                        @else
-                            <a href="{{ route('surat-keluar.review') }}" class="{{ request()->routeIs('surat-keluar.review') ? 'active' : '' }}">
-                                Review Surat Keluar
-                            </a>
-                            <a href="{{ route('surat-keluar.index') }}" class="{{ request()->routeIs('surat-keluar.index') ? 'active' : '' }}">
-                                Data Surat Keluar
-                            </a>
-                        @endif
-                    </div>
+                        {{-- Logic Menu Surat Keluar --}}
+                        <a href="#submenuSuratKeluar" data-bs-toggle="collapse" class="{{ request()->is('surat-keluar*') ? 'active' : 'collapsed' }}" aria-expanded="{{ request()->is('surat-keluar*') ? 'true' : 'false' }}">
+                            <i class="fas fa-paper-plane"></i> Surat Keluar <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8rem;"></i>
+                        </a>
+                        <div class="collapse {{ request()->is('surat-keluar*') ? 'show' : '' }}" id="submenuSuratKeluar">
+                            
+                            @if(Auth::user()->role == 'staff')
+                                <a href="{{ route('surat-keluar.create') }}" class="{{ request()->routeIs('surat-keluar.create') ? 'active' : '' }}">
+                                    Buat Surat Keluar
+                                </a>
+                                <a href="{{ route('surat-keluar.aktif') }}" class="{{ request()->routeIs('surat-keluar.aktif') ? 'active' : '' }}">
+                                    Surat Keluar Aktif
+                                </a>
+                                <a href="{{ route('surat-keluar.index') }}" class="{{ request()->routeIs('surat-keluar.index') ? 'active' : '' }}">
+                                    Data Surat Keluar
+                                </a>
+                            @else
+                                <a href="{{ route('surat-keluar.review') }}" class="{{ request()->routeIs('surat-keluar.review') ? 'active' : '' }}">
+                                    Review Surat Keluar
+                                </a>
+                                <a href="{{ route('surat-keluar.index') }}" class="{{ request()->routeIs('surat-keluar.index') ? 'active' : '' }}">
+                                    Data Surat Keluar
+                                </a>
+                            @endif
+                        </div>
+                    @endif
 
                     @if(in_array(auth()->user()->role, ['staff', 'admin']))
                         <a href="{{ route('admin.pengajuan.index') }}" class="{{ request()->is('admin/pengajuan*') ? 'active' : '' }}">
@@ -215,9 +218,11 @@
                         </a>
                     @endif
 
-                    <a href="{{ route('arsip.index') }}" class="{{ request()->is('arsip*') ? 'active' : '' }}">
-                        <i class="fas fa-archive"></i> Arsip Surat
-                    </a>
+                    @if(auth()->user()->role != 'admin')
+                        <a href="{{ route('arsip.index') }}" class="{{ request()->is('arsip*') ? 'active' : '' }}">
+                            <i class="fas fa-archive"></i> Arsip Surat
+                        </a>
+                    @endif
 
                     <a href="{{ route('reports.index') }}" class="{{ request()->is('reports*') ? 'active' : '' }}">
                         <i class="fas fa-chart-bar"></i> Laporan

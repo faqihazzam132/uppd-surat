@@ -58,10 +58,7 @@ class DisposisiController extends Controller
         // Tentukan siapa tujuan disposisi berdasarkan role pengirim
         $tujuan = collect();
 
-        if ($user->role === 'admin') {
-            // Admin bisa disposisi ke semua internal
-            $tujuan = User::whereIn('role', ['kepala_unit', 'kasubbag', 'staff'])->where('id', '!=', $user->id)->get();
-        } elseif ($user->role === 'kepala_unit') {
+        if ($user->role === 'kepala_unit') {
             // Kepala Unit -> Kasubbag
             $tujuan = User::where('role', 'kasubbag')->get();
         } elseif ($user->role === 'kasubbag') {

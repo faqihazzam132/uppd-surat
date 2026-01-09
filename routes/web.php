@@ -53,8 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllRead');
     });
 
-    // --- KHUSUS INTERNAL (Admin, Staff, Kepala Unit) ---
-    Route::middleware(['role:admin,staff,kepala_unit,kasubbag'])->group(function () {
+    // --- KHUSUS INTERNAL (Staff, Kepala Unit, Kasubbag) - OPERASIONAL ---
+    Route::middleware(['role:staff,kepala_unit,kasubbag'])->group(function () {
 
         Route::get('/surat-masuk/validasi', [SuratMasukController::class, 'validasi'])->name('surat-masuk.validasi');
         Route::get('/surat-masuk/{id}/view-file', [SuratMasukController::class, 'viewFile'])->name('surat-masuk.view-file');
@@ -84,7 +84,10 @@ Route::middleware('auth')->group(function () {
         // Arsip
         Route::resource('arsip', \App\Http\Controllers\ArsipController::class);
         Route::get('/arsip/create/{type}/{id}', [\App\Http\Controllers\ArsipController::class, 'create'])->name('arsip.create_from_surat');
+    });
 
+    // --- REPORTING & MONITORING (Admin, Staff, Kepala Unit, Kasubbag) ---
+    Route::middleware(['role:admin,staff,kepala_unit,kasubbag'])->group(function () {
         // Laporan
         Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
